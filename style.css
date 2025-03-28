@@ -1,0 +1,109 @@
+/* Tema escuro */
+body {
+    font-family: Arial, sans-serif;
+    background: #121212;
+    color: #f0f0f0;
+    padding: 20px;
+    text-align: center;
+  }
+  
+  .container {
+    max-width: 800px;
+    margin: auto;
+    background: #1e1e1e;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  }
+
+  h1{
+    color: #FDB7EA;
+  }
+  
+  input, select, button {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+    border: 1px solid #444;
+    font-size: 14px;
+    background: #2c2c2c;
+    color: #fff;
+  }
+  
+  button {
+    font-family: 'Orbitron', monospace;
+    background-color: #1a1a1a;
+    color: #FDB7EA;
+    border: 2px solid #FDB7EA;
+    border-radius: 10px;
+    padding: 10px 20px;
+    margin: 5px;
+    font-size: 1em;
+    cursor: pointer;
+    text-shadow: 0 0 5px #FDB7EA;
+    box-shadow: 0 0 10px #00ffcc44;
+    transition: all 0.3s ease;
+  }
+  
+  button:hover {
+    background-color: #da16d0;
+    color: #121212;
+    box-shadow: 0 0 20px #da16d0;
+    text-shadow: none;
+  }
+  
+  
+  #timer {
+    font-family: 'Orbitron', monospace;
+    font-size: 5em;
+    margin: 20px 0;
+    color: #FDB7EA;
+    text-shadow: 0 0 10px #FDB7EA;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    background: #2c2c2c;
+  }
+  
+  table th, table td {
+    border: 1px solid #555;
+    padding: 8px;
+    color: #eee;
+  }
+  
+  .progress-bar {
+    height: 20px;
+    background: #444;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  .progress {
+    height: 100%;
+    background-color: #da16d0;
+    width: 0%;
+    transition: width 0.4s;
+  }
+  
+  .mascote-container {
+    margin-top: 30px;
+  }
+  .mascote-container img {
+    height: auto;
+    width: 200px;
+  }
+  
+  .mascote-container img {
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 0 7px #FDB7EA);
+  }
+  
+  .mascote-container p {
+    font-weight: bold;
+    margin-top: 12px;
+    color: #da16d0;
+  }
+  

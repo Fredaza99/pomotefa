@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomotefa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>📚 POMOTEFA</h1>
+    <div class="mascote-container">
+        <img id="mascoteImg" src="images/mascote1.webp" alt="Mascote" width="120">
+        <p id="nivelMascote">Nível 1</p>
+      </div>
+      
+
+    <div class="form-config">
+      <input type="text" id="novaMateria" placeholder="Nova matéria">
+      <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="1">
+      <button onclick="adicionarMateria()">Adicionar</button>
+    </div>
+
+    <div class="controle-pomodoro">
+      <select id="materiaAtual"></select>
+      <input type="number" id="tempoEstudo" placeholder="Tempo de estudo (min)" min="1" value="25">
+      <input type="number" id="tempoIntervalo" placeholder="Intervalo (min)" min="1" value="5">
+      <div id="timer">25:00</div>
+      <button onclick="playPomodoro()"><i class="fas fa-play"></i></button>
+      <button onclick="pausePomodoro()"><i class="fas fa-pause"></i></button>
+      <button onclick="resetPomodoro()"><i class="fas fa-rotate-right"></i></button>
+      
+    </div>
+
+    <h2>Metas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Matéria</th>
+          <th>Meta (h)</th>
+          <th>Estudado (min)</th>
+          <th>Progresso</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaMetas"></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
