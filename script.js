@@ -1,9 +1,8 @@
 let materias = {};
 let timer = null;
-let tempoRestante = 25 * 60;
-let emPausa = true;
-let emIntervalo = false;
+let tempoDecorrido = 0;
 let materiaSelecionada = "";
+let segundosAcumulados = 0;
 
 if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
@@ -17,12 +16,60 @@ function carregarDoLocalStorage() {
       materias = JSON.parse(dadosSalvos);
       atualizarSelect();
       atualizarTabela();
+      atualizarMascote();
+      atualizarResumoEstudos();
+      
+
     }
   }
   
   // Salvar dados no localStorage
   function salvarNoLocalStorage() {
     localStorage.setItem("materiasEstudo", JSON.stringify(materias));
+  }
+
+
+  function iniciarEstudo() {
+    materiaSelecionada = document.getElementById("materiaAtual").value;
+    if (!materiaSelecionada || !materias[materiaSelecionada]) return;
+  
+    if (timer) return; // Já está rodando
+  
+    timer = setInterval(() => {
+      tempoDecorrido++;
+      segundosAcumulados++;
+  
+      atualizarTimerDisplay();
+  
+      // A cada 60 segundos, somamos 1 minuto à matéria
+      if (segundosAcumulados >= 60) {
+        materias[materiaSelecionada].minutosEstudados += 1;
+        segundosAcumulados = 0;
+  
+        salvarNoLocalStorage();
+        atualizarTabela();
+        atualizarMascote();
+        atualizarResumoEstudos();
+      }
+    
+    }, 1000);
+  }
+  
+  function pararEstudo() {
+    clearInterval(timer);
+    timer = null;
+  }
+  
+  function atualizarTimerDisplay() {
+    const horas = Math.floor(tempoDecorrido / 3600);
+    const minutos = Math.floor((tempoDecorrido % 3600) / 60);
+    const segundos = tempoDecorrido % 60;
+  
+    const tempoFormatado = 
+      `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+  
+    document.getElementById("timer").textContent = tempoFormatado;
+    document.title = timer ? `⏳ ${tempoFormatado} - Pomotefa` : 'Pomotefa';
   }
   
 
@@ -35,6 +82,8 @@ function adicionarMateria() {
   atualizarSelect();
   atualizarTabela();
   salvarNoLocalStorage();
+  atualizarResumoEstudos();
+  atualizarMascote();
     document.getElementById("novaMateria").value = "";
   document.getElementById("metaHoras").value = "";
 }
@@ -59,86 +108,18 @@ function atualizarTabela() {
     const progresso = Math.min((minutosEstudados / (metaHoras * 60)) * 100, 100);
 
     tbody.innerHTML += `
-      <tr>
-        <td>${nome}</td>
-        <td>${metaHoras}</td>
-        <td>${minutosEstudados}</td>
-        <td>
-          <div class="progress-bar">
-            <div class="progress" style="width:${progresso}%"></div>
-          </div>
-        </td>
-      </tr>
-    `;
+  <tr data-progresso style="--progresso: ${progresso}%">
+    <td>${nome}</td>
+    <td>${metaHoras}</td>
+    <td>${minutosEstudados}</td>
+  </tr>
+`;
+
+
   }
 }
 
-function playPomodoro() {
-  const estudoMin = parseInt(document.getElementById("tempoEstudo").value);
-  const intervaloMin = parseInt(document.getElementById("tempoIntervalo").value);
-  materiaSelecionada = document.getElementById("materiaAtual").value;
 
-  if (!materiaSelecionada || !materias[materiaSelecionada]) return;
-
-  if (emPausa) {
-    emPausa = false;
-    timer = setInterval(() => {
-      if (tempoRestante > 0) {
-        tempoRestante--;
-        atualizarTimerDisplay();
-      } else {
-        clearInterval(timer);
-        emPausa = true;
-        if (!emIntervalo) {
-            materias[materiaSelecionada].minutosEstudados += estudoMin;
-            salvarNoLocalStorage();
-            atualizarTabela();
-            atualizarMascote();
-          
-            tempoRestante = intervaloMin * 60;
-            emIntervalo = true;
-            notificar("Hora da Pausa!", "Bom trabalho! Agora descanse um pouco.");
-            tocarSom("somPomodoro");
-            playPomodoro();
-          
-          } else {
-            tempoRestante = estudoMin * 60;
-            emIntervalo = false;
-            notificar("Vamos voltar!", "O intervalo acabou, hora de focar.");
-            tocarSom("somIntervalo");
-            playPomodoro();
-          }
-      }
-    }, 1000);
-  }
-}
-
-function pausePomodoro() {
-  clearInterval(timer);
-  emPausa = true;
-}
-
-function resetPomodoro() {
-  pausePomodoro();
-  const estudoMin = parseInt(document.getElementById("tempoEstudo").value);
-  tempoRestante = estudoMin * 60;
-  emIntervalo = false;
-  atualizarTimerDisplay();
-}
-
-function atualizarTimerDisplay() {
-    const minutos = Math.floor(tempoRestante / 60);
-    const segundos = tempoRestante % 60;
-    const tempoFormatado = `${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-  
-    document.getElementById("timer").textContent = tempoFormatado;
-  
-    if (!emPausa) {
-      document.title = `⏳ ${tempoFormatado} - Pomotefa`;
-    } else {
-      document.title = 'Pomotefa';
-    }
-  }
 
   function notificar(titulo, corpo) {
     if (Notification.permission === "granted") {
@@ -160,24 +141,61 @@ function atualizarTimerDisplay() {
   
   
 
-function atualizarMascote() {
+  function atualizarMascote() {
     const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0);
     const mascoteImg = document.getElementById("mascoteImg");
     const nivelMascote = document.getElementById("nivelMascote");
+    const barraXp = document.getElementById("xpMascote");
+    const textoXp = document.getElementById("xpTexto");
   
     let nivel = 1;
-    if (totalMinutos >= 240) nivel = 5;
-    else if (totalMinutos >= 180) nivel = 4;
-    else if (totalMinutos >= 120) nivel = 3;
-    else if (totalMinutos >= 60) nivel = 2;
+    let xpMin = 0;
+    let xpMax = 240;
   
-    mascoteImg.src = `images/mascote${nivel}.webp`;
-
-    nivelMascote.textContent = `Nível ${nivel}`;
+    if (totalMinutos >= 18000) { // 300h
+      nivel = 6;
+      xpMin = 18000;
+      xpMax = 18000;
+    } else if (totalMinutos >= 5400) { // 90h
+      nivel = 5;
+      xpMin = 5400;
+      xpMax = 18000;
+    } else if (totalMinutos >= 2880) { // 48h
+      nivel = 4;
+      xpMin = 2880;
+      xpMax = 5400;
+    } else if (totalMinutos >= 1200) { // 20h
+      nivel = 3;
+      xpMin = 1200;
+      xpMax = 2880;
+    } else if (totalMinutos >= 240) { // 4h
+      nivel = 2;
+      xpMin = 240;
+      xpMax = 1200;
+    } else {
+      nivel = 1;
+      xpMin = 0;
+      xpMax = 240;
+    }
+  
+    mascoteImg.src = `images/mascote${Math.min(nivel, 5)}.webp`;
+    nivelMascote.textContent = Math.min(nivel, 5);
+  
+    const xpAtualMin = totalMinutos - xpMin;
+    const xpNecessarioMin = xpMax - xpMin;
+    const progresso = xpNecessarioMin > 0 ? (xpAtualMin / xpNecessarioMin) * 100 : 100;
+  
+    barraXp.style.width = `${Math.min(progresso, 100)}%`;
+    textoXp.textContent = `XP: ${xpAtualMin} / ${xpNecessarioMin} min`;
   }
+  
+  
+  
+  
+  
   
 
 // Iniciar com tempo padrão
 atualizarTimerDisplay();
 carregarDoLocalStorage();
-atualizarMascote();
+atualizarResumoEstudos();
