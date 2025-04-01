@@ -1,9 +1,13 @@
+
+
 let materias = {};
 let timer = null;
 let tempoDecorrido = 0;
 let materiaSelecionada = "";
 let segundosAcumulados = 0;
 let progressoExtra = 0;
+
+
 
 
 if ("Notification" in window && Notification.permission !== "granted") {
@@ -24,15 +28,121 @@ if ("Notification" in window && Notification.permission !== "granted") {
       atualizarResumoEstudos();
     }
   }
+
   
   
+
+
+
+
   function salvarNoLocalStorage() {
     localStorage.setItem("materiasEstudo", JSON.stringify({
       materias,
       progressoExtra
     }));
+    verificarConquistas(); // <- adicionado aqui
+
   }
   
+const conquistas = {
+  primeiraMeta: {
+    titulo: "Primeira matéria concluída",
+    descricao: "Complete a meta de uma matéria pela primeira vez.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
+  },
+  esforcoDiario: {
+    titulo: "Grande esforço",
+    descricao: "Estude 8 horas em um único dia.",
+    icone: "images/conquistas/grande-esforco.png",
+    desbloqueada: false
+  },
+  maratona: {
+    titulo: "Maratona de estudos",
+    descricao: "Estude por 3 dias seguidos.",
+    icone: "images/conquistas/maratona.png",
+    desbloqueada: false
+  }
+};
+
+const conquistasSalvas = localStorage.getItem("conquistas");
+if (conquistasSalvas) {
+  const salvas = JSON.parse(conquistasSalvas);
+  for (const id in salvas) {
+    if (conquistas[id]) {
+      conquistas[id].desbloqueada = salvas[id].desbloqueada;
+    }
+  }
+}
+
+
+
+
+function abrirModalConquistas() {
+  atualizarConquistas();
+  document.getElementById("modalConquistas").style.display = "block";
+}
+
+function fecharModalConquistas() {
+  document.getElementById("modalConquistas").style.display = "none";
+}
+
+function atualizarConquistas() {
+  const total = Object.keys(conquistas).length;
+  const desbloqueadas = Object.values(conquistas).filter(c => c.desbloqueada).length;
+
+  document.getElementById("progressoConquistas").textContent = `${desbloqueadas} de ${total} conquistadas (${Math.round((desbloqueadas / total) * 100)}%)`;
+
+  const listaDesbloqueadas = document.getElementById("conquistasDesbloqueadas");
+  const listaBloqueadas = document.getElementById("conquistasBloqueadas");
+
+  listaDesbloqueadas.innerHTML = "";
+  listaBloqueadas.innerHTML = "";
+
+  for (const id in conquistas) {
+    const c = conquistas[id];
+    const div = document.createElement("div");
+    div.className = `conquista ${c.desbloqueada ? 'desbloqueada' : ''}`;
+    div.innerHTML = `
+  <img class="icone" src="${c.icone}" alt="ícone conquista">
+      <div class="info">
+        <strong>${c.titulo}</strong>
+        <p>${c.descricao}</p>
+      </div>
+    `;
+
+    if (c.desbloqueada) {
+      listaDesbloqueadas.appendChild(div);
+    } else {
+      listaBloqueadas.appendChild(div);
+    }
+  }
+}
+
+
+
+function desbloquearConquista(id) {
+  if (!conquistas[id].desbloqueada) {
+    conquistas[id].desbloqueada = true;
+    localStorage.setItem("conquistas", JSON.stringify(conquistas));
+    alert(`🏆 Nova conquista: ${conquistas[id].titulo}`);
+    atualizarConquistas();
+  }
+}
+
+function verificarMaratona(dias) {
+  const datas = dias.map(d => new Date(d)).sort((a, b) => a - b);
+  if (datas.length < 3) return;
+
+  const ultimos = datas.slice(-3);
+  const diff1 = (ultimos[1] - ultimos[0]) / (1000 * 60 * 60 * 24);
+  const diff2 = (ultimos[2] - ultimos[1]) / (1000 * 60 * 60 * 24);
+
+  if (diff1 === 1 && diff2 === 1 && !conquistas.maratona.desbloqueada) {
+    desbloquearConquista("maratona");
+  }
+}
+
 
 
   function iniciarEstudo() {
@@ -51,12 +161,44 @@ if ("Notification" in window && Notification.permission !== "granted") {
       if (segundosAcumulados >= 60) {
         materias[materiaSelecionada].minutosEstudados += 1;
         segundosAcumulados = 0;
-  
+
+        // ✅ Desbloqueios automáticos (seguros)
+        const materia = materias[materiaSelecionada];
+        if (
+          materia &&
+          materia.minutosEstudados >= materia.metaHoras * 60 &&
+          !materia.metaConcluida
+        ) {
+          materia.metaConcluida = true;
+          concluirMeta(materiaSelecionada);
+
+          if (!conquistas.primeiraMeta.desbloqueada) {
+            desbloquearConquista("primeiraMeta");
+          }
+        }
+
+        const hoje = new Date().toLocaleDateString();
+        let minutosHoje = parseInt(localStorage.getItem("estudoHoje_" + hoje) || "0");
+        minutosHoje += 1;
+        localStorage.setItem("estudoHoje_" + hoje, minutosHoje);
+
+        if (minutosHoje >= 480 && !conquistas.esforcoDiario.desbloqueada) {
+          desbloquearConquista("esforcoDiario");
+        }
+
+        let diasEstudados = JSON.parse(localStorage.getItem("diasEstudados") || "[]");
+        if (!diasEstudados.includes(hoje)) {
+          diasEstudados.push(hoje);
+          localStorage.setItem("diasEstudados", JSON.stringify(diasEstudados));
+        }
+        verificarMaratona(diasEstudados);
+
         salvarNoLocalStorage();
         atualizarTabela();
         atualizarMascote();
         atualizarResumoEstudos();
       }
+
     
     }, 1000);
   }
@@ -127,22 +269,71 @@ function atualizarTabela() {
 
 
 
-  function notificar(titulo, corpo) {
-    if (Notification.permission === "granted") {
-      new Notification(titulo, {
-        body: corpo,
-        icon: "images/emoji1.jpg" // ou um ícone qualquer
-      });
-    }
+function concluirMeta(materiaNome) {
+  const materia = materias[materiaNome];
+  if (!materia) return;
+
+  // 🎉 Feedback visual
+  mostrarToast(`🎉 Parabéns! Você concluiu sua meta de ${materiaNome}!`);
+
+  // ✅ Resetar o progresso, mas manter a meta
+  materia.minutosEstudados = 0;
+
+  // ⚙️ Marcar como não concluída para poder atingir de novo no futuro
+  materia.metaConcluida = false;
+
+  // 💾 Atualizações visuais e armazenamento
+  salvarNoLocalStorage();
+  atualizarTabela();
+  atualizarResumoEstudos();
+  atualizarMascote();
+}
+
+
+function mostrarToast(mensagem) {
+  const toast = document.createElement("div");
+  toast.className = "toast-sucesso";
+  toast.textContent = mensagem;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.classList.add("visivel");
+    setTimeout(() => {
+      toast.classList.remove("visivel");
+      setTimeout(() => toast.remove(), 300);
+    }, 3000);
+  }, 100);
+}
+
+
+
+
+
+
+
+
+function verificarConquistas() {
+  const materia = materias[materiaSelecionada];
+  if (
+    materia &&
+    materia.minutosEstudados >= materia.metaHoras * 60 &&
+    !conquistas.primeiraMeta.desbloqueada
+  ) {
+    desbloquearConquista("primeiraMeta");
   }
 
-  function tocarSom(tipo) {
-    const audio = document.getElementById(tipo);
-    if (audio) {
-      audio.currentTime = 0;
-      audio.play();
-    }
+
+  let diasEstudados = JSON.parse(localStorage.getItem("diasEstudados") || "[]");
+  const hoje = new Date().toISOString().split("T")[0];
+  if (!diasEstudados.includes(hoje)) {
+    diasEstudados.push(hoje);
+    localStorage.setItem("diasEstudados", JSON.stringify(diasEstudados));
   }
+  verificarMaratona(diasEstudados);
+
+}
+
+
   
   function atualizarResumoEstudos() {
     const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
@@ -278,6 +469,10 @@ function atualizarTabela() {
       ativarModoEdicao();
     }
   }
+
+
+
+
   
   
   

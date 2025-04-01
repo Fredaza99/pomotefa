@@ -13,14 +13,33 @@
 <body>
   
   <div class="container">
-    <div id="resumoEstudos" class="tooltip-wrapper">
-      <span class="tooltip-text">
-        ⭐ TOTAL ESTUDADO: <span id="totalHoras">0</span> horas
-      </span>
-      <div class="tooltip-detalhes" id="tooltipDetalhes">
+    <div class="resumo-e-conquistas">
+      <div id="resumoEstudos" class="tooltip-wrapper">
+<span class="tooltip-text">
+  <img src="images/icones/book.png" alt="Livro" class="icone-pixel-book">
+  TOTAL ESTUDADO: <span id="totalHoras">0</span> horas
+</span>
+
+        <div class="tooltip-detalhes" id="tooltipDetalhes"></div>
       </div>
+      <button class="btn-conquistas" onclick="abrirModalConquistas()">🏆 Ver Conquistas</button>
     </div>
-    <h1>📚 POMOTEFA</h1>
+
+<div id="modalConquistas" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="fecharModalConquistas()">×</span>
+    <h2>🏆 Conquistas</h2>
+    <p id="progressoConquistas">0 de 0 conquistadas (0%)</p>
+    <div id="conquistasDesbloqueadas" class="conquistas-grid"></div>
+
+    <h3 class="secao-conquistas">Conquistas Nao Alcançadas</h3>
+    <div id="conquistasBloqueadas" class="conquistas-grid"></div>
+  </div>
+</div>
+
+
+
+<h1>POMOTEFA<img src="images/icones/star.png" alt="Estrela" class="icone-pixel-star"></h1>
     <div class="mascote-container">
         <img id="mascoteImg" src="images/mascote1.webp" alt="Mascote" width="120">
         <div class="xp-container">
@@ -65,7 +84,9 @@
       <tbody id="tabelaMetas"></tbody>
     </table>
   </div>
-  <button id="editarMateriasBtn" onclick="ativarModoEdicao()">✏️ Editar matérias</button>
+<button id="editarMateriasBtn" onclick="ativarModoEdicao()">
+  <img src="images/icones/pincel.png" alt="Lápis" class="icone-pixel"> Editar matérias
+</button>
 <div id="modoEdicao" style="display: none; margin-top: 20px;">
   <table>
     <thead>

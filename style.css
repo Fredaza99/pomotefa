@@ -20,6 +20,8 @@ body {
   }
 
   h1{
+    font-size: 30px;
+    font-family: 'Orbitron', monospace;    
     color: #FDB7EA;
   }
   
@@ -303,3 +305,188 @@ tr[data-progresso] td::before {
     opacity: 1;
   }
   
+
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+  
+    .modal-content {
+      background-color: #1e1e1e;
+      margin: 60px auto;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 800px;
+      color: #fff;
+      font-family: 'Orbitron', monospace;
+    }
+  
+    .close {
+      float: right;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #ccc;
+    }
+  
+    .conquistas-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-top: 20px;
+    }
+  
+.conquista {
+  display: flex;
+  align-items: center;
+  background: #2a2a2a;
+  padding: 12px;
+  border-radius: 10px;
+  transition: 0.3s ease;
+  opacity: 0.5;
+  filter: grayscale(1);
+}
+
+.conquista.desbloqueada {
+  opacity: 1;
+  filter: none;
+  border: 1px solid #00ffcc;
+}
+
+.conquista .icone {
+  font-size: 2em;
+  margin-right: 16px;
+}
+  
+    .conquista img {
+      width: 48px;
+      height: 48px;
+      margin-right: 16px;
+    }
+  
+    .conquista .info {
+      flex: 1;
+    }
+
+ .conquista .icone {
+   width: 48px;
+   height: 48px;
+   margin-right: 16px;
+   image-rendering: pixelated;
+   border-radius: 8px;
+   border: 2px solid #666;
+   /* cor padrão para bloqueadas */
+   background-color: #111;
+ }
+    
+.conquista.desbloqueada .icone {
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background-image: linear-gradient(#111, #111), linear-gradient(45deg, #00ffc3, #00bfff, #8e2de2, #00ffc3);
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+  animation: bordaBrilhante 4s linear infinite;
+}
+
+@keyframes bordaBrilhante {
+  0% {
+    background-image: linear-gradient(#111, #111), linear-gradient(45deg, #00ffc3, #00bfff, #8e2de2, #00ffc3);
+  }
+
+  100% {
+    background-image: linear-gradient(#111, #111), linear-gradient(405deg, #00ffc3, #00bfff, #8e2de2, #00ffc3);
+  }
+}
+
+        .resumo-e-conquistas {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+          flex-wrap: wrap;
+        }
+    
+                .tooltip-wrapper {
+                  flex: 1;
+                  text-align: left;
+                  margin-bottom: 10px;
+                }
+    
+        .btn-conquistas {
+          font-family: 'Orbitron', monospace;
+          background-color: #1e1e1e;
+          border: 2px solid #ff99ff;
+          border-radius: 10px;
+          color: #fff;
+          padding: 8px 16px;
+          cursor: pointer;
+          font-size: 1em;
+          transition: 0.3s;
+        }
+    
+        .btn-conquistas:hover {
+          background-color: #333;
+        }
+
+
+
+                .secao-conquistas {
+                  margin-top: 30px;
+                  font-size: 1.1em;
+                  color: #bbb;
+                  border-top: 1px solid #333;
+                  padding-top: 10px;
+                }
+
+.icone-pixel {
+  width: 20px;
+  height: 20px;
+  image-rendering: pixelated;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+
+.icone-pixel-star {
+  width: 45px;
+  height: 45px;
+  image-rendering: pixelated;
+  vertical-align: middle;
+  margin-left: 8px;
+  margin-bottom: 10px;
+}
+
+.icone-pixel-book{
+  width: 42px;
+  height: 42px;
+  image-rendering: pixelated;
+  vertical-align: middle;
+  margin-left: 8px;
+  margin-bottom: 10px;
+}
+
+.toast-sucesso {
+  position: fixed;
+  top: 20px;
+  right: -400px;
+  background-color: #00cc99;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-family: 'Orbitron', monospace;
+  font-size: 1em;
+  box-shadow: 0 0 10px #000;
+  z-index: 9999;
+  transition: right 0.4s ease;
+}
+
+.toast-sucesso.visivel {
+  right: 20px;
+}
