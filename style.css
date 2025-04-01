@@ -228,27 +228,78 @@ tr[data-progresso] td::before {
     color: #da16d0;
   }
   
-  #resumoEstudos {
-    margin-top: 20px;
-    text-align: left;
-    background-color: #2c2c2c;
-    padding: 15px;
-    border-radius: 10px;
-    color: #FDB7EA;
-    box-shadow: 0 0 12px #ffd0f2;
-  }
-  
-  #resumoEstudos p, #resumoEstudos li {
-    font-family: 'Orbitron', monospace;
-    margin: 5px 0;
-  }
-  
   #resumoEstudos ul {
     list-style: none;
     padding: 0;
+    margin: 10px 0 0 0;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.95em;
+    color: #ccc;
+    text-align: center;
   }
   
-
-
+  #resumoEstudos li {
+    margin: 3px 0;
+  }
   
+  
+
+
+  #editarMateriasBtn {
+    margin-top: 20px;
+  }
+  
+  #modoEdicao input {
+    width: 80%;
+    padding: 5px;
+    border-radius: 6px;
+    font-family: 'Orbitron', monospace;
+  }
+  
+  #modoEdicao button {
+    font-size: 0.9em;
+    margin-top: 10px;
+  }
+  
+  
+
+  .tooltip-wrapper {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+  }
+  
+  .tooltip-text {
+    cursor: default;
+    color: #fff;
+  }
+  
+  .tooltip-detalhes {
+    visibility: hidden;
+    background-color: #1e1e1e;
+    color: #ccc;
+    text-align: left;
+    padding: 8px 10px;
+    border-radius: 8px;
+    position: absolute;
+    z-index: 10;
+    width: max-content;
+    min-width: 150px;
+    max-width: 250px;
+    top: 130%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    font-size: 0.85em;
+    line-height: 1.4;
+    white-space: pre-line;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+  }
+  
+  .tooltip-wrapper:hover .tooltip-detalhes {
+    visibility: visible;
+    opacity: 1;
+  }
   

@@ -24,6 +24,14 @@
         </div>
         
       </div>
+      <br>
+      <div id="resumoEstudos" class="tooltip-wrapper">
+        <span class="tooltip-text">
+          ⭐ Total estudado: <span id="totalHoras">0</span> horas
+        </span>
+        <div class="tooltip-detalhes" id="tooltipDetalhes">
+        </div>
+      </div>
       
       
 
@@ -41,7 +49,7 @@
 
       
     </div>
-
+    
     <h2>Metas</h2>
     <table>
       <thead>
@@ -54,11 +62,23 @@
       <tbody id="tabelaMetas"></tbody>
     </table>
   </div>
-  <h3>Resumo de Estudos</h3>
-<div id="resumoEstudos">
-  <p><strong>Total de horas estudadas:</strong> <span id="totalHoras">0</span> h</p>
-  <ul id="resumoPorMateria"></ul>
+  <button id="editarMateriasBtn" onclick="ativarModoEdicao()">✏️ Editar matérias</button>
+<div id="modoEdicao" style="display: none; margin-top: 20px;">
+  <table>
+    <thead>
+      <tr>
+        <th>Matéria</th>
+        <th>Meta (h)</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaEdicao"></tbody>
+  </table>
+  <button onclick="salvarEdicoes()">💾 Salvar alterações</button>
 </div>
+
+
+
 
   <script src="script.js"></script>
 </body>

@@ -3,30 +3,36 @@ let timer = null;
 let tempoDecorrido = 0;
 let materiaSelecionada = "";
 let segundosAcumulados = 0;
+let progressoExtra = 0;
+
 
 if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
   }
   
 
-// Carregar dados do localStorage
-function carregarDoLocalStorage() {
+  function carregarDoLocalStorage() {
     const dadosSalvos = localStorage.getItem("materiasEstudo");
     if (dadosSalvos) {
-      materias = JSON.parse(dadosSalvos);
+      const dados = JSON.parse(dadosSalvos);
+      materias = dados.materias || dados; // compatibilidade com estrutura antiga
+      progressoExtra = dados.progressoExtra || 0;
+  
       atualizarSelect();
       atualizarTabela();
       atualizarMascote();
       atualizarResumoEstudos();
-      
-
     }
   }
   
-  // Salvar dados no localStorage
+  
   function salvarNoLocalStorage() {
-    localStorage.setItem("materiasEstudo", JSON.stringify(materias));
+    localStorage.setItem("materiasEstudo", JSON.stringify({
+      materias,
+      progressoExtra
+    }));
   }
+  
 
 
   function iniciarEstudo() {
@@ -138,11 +144,35 @@ function atualizarTabela() {
     }
   }
   
+  function atualizarResumoEstudos() {
+    const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
+    const totalHoras = (totalMinutos / 60).toFixed(2);
+  
+    const resumoEl = document.getElementById("resumoEstudos");
+    const totalEl = document.getElementById("totalHoras");
+    const tooltipDetalhes = document.getElementById("tooltipDetalhes");
+  
+    if (resumoEl && totalEl) {
+      totalEl.textContent = totalHoras;
+    }
+  
+    if (tooltipDetalhes) {
+      tooltipDetalhes.textContent = ""; // limpa antes
+      for (const nome in materias) {
+        const horas = (materias[nome].minutosEstudados / 60).toFixed(2);
+        tooltipDetalhes.textContent += `${nome}: ${horas}h\n`;
+      }
+    }
+  }
+  
+
+  
+  
   
   
 
   function atualizarMascote() {
-    const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0);
+    const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
     const mascoteImg = document.getElementById("mascoteImg");
     const nivelMascote = document.getElementById("nivelMascote");
     const barraXp = document.getElementById("xpMascote");
@@ -190,6 +220,64 @@ function atualizarTabela() {
   }
   
   
+  function ativarModoEdicao() {
+    const tabelaEdicao = document.getElementById("tabelaEdicao");
+    tabelaEdicao.innerHTML = "";
+  
+    for (const nome in materias) {
+      const { metaHoras } = materias[nome];
+  
+      tabelaEdicao.innerHTML += `
+        <tr>
+          <td><input type="text" value="${nome}" data-original="${nome}" class="input-nome"></td>
+          <td><input type="number" min="1" value="${metaHoras}" class="input-meta"></td>
+          <td><button onclick="excluirMateria('${nome}')">🗑️ Excluir</button></td>
+        </tr>
+      `;
+    }
+  
+    document.getElementById("modoEdicao").style.display = "block";
+  }
+  
+  function salvarEdicoes() {
+    const linhas = document.querySelectorAll("#tabelaEdicao tr");
+  
+    const novasMaterias = {};
+    for (const linha of linhas) {
+      const inputNome = linha.querySelector(".input-nome");
+      const inputMeta = linha.querySelector(".input-meta");
+  
+      const novoNome = inputNome.value.trim();
+      const meta = parseInt(inputMeta.value);
+      const nomeOriginal = inputNome.getAttribute("data-original");
+  
+      if (!novoNome || !meta) continue;
+  
+      const minutosEstudados = materias[nomeOriginal]?.minutosEstudados || 0;
+      novasMaterias[novoNome] = { metaHoras: meta, minutosEstudados };
+    }
+  
+    materias = novasMaterias;
+    salvarNoLocalStorage();
+    atualizarTabela();
+    atualizarSelect();
+    atualizarResumoEstudos();
+    atualizarMascote();
+  
+    document.getElementById("modoEdicao").style.display = "none";
+    document.getElementById("editarMateriasBtn").disabled = false;
+      }
+  
+  function excluirMateria(nome) {
+    if (confirm(`Tem certeza que deseja excluir "${nome}"?`)) {
+      if (materias[nome]?.minutosEstudados) {
+        progressoExtra += materias[nome].minutosEstudados;
+      }
+      delete materias[nome];
+      salvarNoLocalStorage();
+      ativarModoEdicao();
+    }
+  }
   
   
   
