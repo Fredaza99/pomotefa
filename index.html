@@ -11,7 +11,15 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  
   <div class="container">
+    <div id="resumoEstudos" class="tooltip-wrapper">
+      <span class="tooltip-text">
+        ⭐ TOTAL ESTUDADO: <span id="totalHoras">0</span> horas
+      </span>
+      <div class="tooltip-detalhes" id="tooltipDetalhes">
+      </div>
+    </div>
     <h1>📚 POMOTEFA</h1>
     <div class="mascote-container">
         <img id="mascoteImg" src="images/mascote1.webp" alt="Mascote" width="120">
@@ -25,13 +33,7 @@
         
       </div>
       <br>
-      <div id="resumoEstudos" class="tooltip-wrapper">
-        <span class="tooltip-text">
-          ⭐ Total estudado: <span id="totalHoras">0</span> horas
-        </span>
-        <div class="tooltip-detalhes" id="tooltipDetalhes">
-        </div>
-      </div>
+
       
       
 
@@ -40,9 +42,10 @@
       <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="1">
       <button onclick="adicionarMateria()">Adicionar</button>
     </div>
-
+    
     <div class="controle-pomodoro">
       <select id="materiaAtual"></select>
+      
       <div id="timer">00:00:00</div>
   <button onclick="iniciarEstudo()"><i class="fas fa-play"></i> Iniciar</button>
   <button onclick="pararEstudo()"><i class="fas fa-stop"></i> Parar</button>
