@@ -3,11 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pomotefa</title>
+  <title>Login | Pomotefa - Entre nessa jornada de estudo gamificado.</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icones/favicon-32x32.png">
+  <link rel="manifest" href="/site.webmanifest">
 
 
 
@@ -69,7 +73,7 @@
   });
 </script>
 
- 
+
 
 
 <main class="main-layout">
@@ -120,7 +124,12 @@
 
   
   
-  
+  <div id="aviso-firefox" class="aviso-firefox oculto">
+    <strong>Ei, aventureiro!</strong> Detectamos que você está usando o navegador Firefox.<br>
+    Infelizmente, algumas funcionalidades da <strong>Pomotefa</strong> podem não funcionar corretamente aqui.<br>
+    Recomendamos usar <strong>Google Chrome</strong> ou <strong>Microsoft Edge</strong> para a melhor experiência!
+    <button onclick="fecharAvisoFirefox()">Entendi</button>
+  </div>
 
 <script type="module" src="script_firebase_corrigido_final.js" defer></script>
 </body>

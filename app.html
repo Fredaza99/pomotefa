@@ -3,14 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pomotefa</title>
+  <title>Pomotefa - Entre nessa jornada de estudo gamificado.</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="images/icones/favicon-32x32.png">
+    <link rel="manifest" href="/site.webmanifest">
 
 
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="oculto">
+
 
 
 
@@ -41,7 +45,6 @@
     <div id="conquistasBloqueadas" class="conquistas-grid"></div>
   </div>
 </div>
-
 
 
 <h1>POMOTEFA<img src="images/icones/star.png" alt="Estrela" class="icone-pixel-star"></h1>
@@ -77,7 +80,7 @@
       
     </div>
     
-    <h2>Metas</h2>
+    <h2 class="titulo-table"> Metas</h2>
     <table>
       <thead>
         <tr>
@@ -105,8 +108,79 @@
   </table>
   <button onclick="salvarEdicoes()">💾 Salvar alterações</button>
 </div>
+<canvas id="backgroundCanvas"></canvas> <!-- Canvas como fundo -->
+<script>
+
+  const canvas = document.getElementById("backgroundCanvas");
+  const ctx = canvas.getContext("2d");
+  const colors = ["rgba(255, 255, 255, ALPHA)", "rgba(173, 216, 230, ALPHA)", "rgba(255, 223, 0, ALPHA)"];
 
 
+
+  // Ajusta o tamanho do canvas
+  function resizeCanvas() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resizeCanvas);
+  resizeCanvas();
+
+  // Configurações das estrelas
+  const stars = [];
+  const totalStars = 1500; // Número total de estrelas
+
+  // Inicializa as estrelas
+  function createStars() {
+    for (let i = 0; i < totalStars; i++) {
+      stars.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 2, // Tamanho aleatório
+        alpha: Math.random(), // Brilho inicial
+        alphaChange: Math.random() * 0.02 - 0.01, // Velocidade de mudança do brilho
+      });
+    }
+  }
+
+  // Atualiza o brilho das estrelas
+  function updateStars() {
+    stars.forEach((star) => {
+      star.alpha += star.alphaChange;
+
+      // Inverte o brilho ao atingir os limites
+      if (star.alpha <= 0 || star.alpha >= 1) {
+        star.alphaChange *= -1;
+      }
+    });
+  }
+
+  // Desenha as estrelas no canvas
+  function drawStars() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "rgba(0, 0, 0, 1)";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    stars.forEach((star) => {
+      ctx.beginPath();
+      ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`; // Brilho dinâmico
+      ctx.fill();
+    });
+  }
+
+
+  // Loop de animação
+  function animate() {
+    updateStars();
+    drawStars();
+    requestAnimationFrame(animate);
+  }
+
+  createStars();
+  animate();
+
+
+</script>
 
   <script type="module" src="script_firebase_corrigido_final.js"></script>
 </body>

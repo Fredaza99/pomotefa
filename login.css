@@ -2,7 +2,7 @@
 body {
     margin: 0;
     padding: 0;
-    background-image: url(images/background-login.jpg);
+    background-image: url(images/background-login.webp);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -211,3 +211,58 @@ margin-left: 50px;
 
   }
   
+
+    .aviso-firefox {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      max-width: 450px;
+      background: #1e1e2f;
+      color: #fff;
+      border: 2px solid #f39c12;
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Pixel', sans-serif;
+      font-size: 18px;
+      z-index: 9999;
+      box-shadow: 0 0 12px #f39c12;
+      animation: aparecer 0.5s ease forwards;
+    }
+  
+    .aviso-firefox button {
+      background: #f39c12;
+      border: none;
+      border-radius: 8px;
+      padding: 6px 12px;
+      color: #1e1e2f;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+  
+    .oculto {
+      display: none;
+    }
+  
+    @keyframes aparecer {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+  
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+        #backgroundCanvas {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -1;
+          /* Coloca o canvas atrás do conteúdo */
+        }
