@@ -11,6 +11,30 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <script type="module">
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+const auth = getAuth();
+let uid = null;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    uid = user.uid;
+    usuarioRef = doc(db, "usuarios", uid);
+    carregarDoFirebase();
+  } else {
+    window.location.href = "login.html"; // Redireciona se não estiver logado
+  }
+});
+
+
+
+
+
+  </script>
+
+  
+  
   
   <div class="container">
     <div class="resumo-e-conquistas">
@@ -103,7 +127,6 @@
 
 
 
-
-  <script src="script.js"></script>
+  <script type="module" src="script_firebase_corrigido_final.js"></script>
 </body>
 </html>
