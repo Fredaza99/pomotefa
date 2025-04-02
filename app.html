@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pomotefa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="oculto">
+
+
+
+  
+  
+  
+  <div class="container">
+    <div class="resumo-e-conquistas">
+      <div id="resumoEstudos" class="tooltip-wrapper">
+<span class="tooltip-text">
+  <img src="images/icones/book.png" alt="Livro" class="icone-pixel-book">
+  TOTAL ESTUDADO: <span id="totalHoras">0</span> horas
+</span>
+
+        <div class="tooltip-detalhes" id="tooltipDetalhes"></div>
+      </div>
+      <button class="btn-conquistas" onclick="abrirModalConquistas()">🏆 Ver Conquistas</button>
+    </div>
+
+<div id="modalConquistas" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="fecharModalConquistas()">×</span>
+    <h2>🏆 Conquistas</h2>
+    <p id="progressoConquistas">0 de 0 conquistadas (0%)</p>
+    <div id="conquistasDesbloqueadas" class="conquistas-grid"></div>
+
+    <h3 class="secao-conquistas">Conquistas Nao Alcançadas</h3>
+    <div id="conquistasBloqueadas" class="conquistas-grid"></div>
+  </div>
+</div>
+
+
+
+<h1>POMOTEFA<img src="images/icones/star.png" alt="Estrela" class="icone-pixel-star"></h1>
+    <div class="mascote-container">
+        <img id="mascoteImg" src="images/mascote1.webp" alt="Mascote" width="120">
+        <div class="xp-container">
+          <div class="xp-bar">
+            <div id="xpMascote" class="xp-fill"></div>
+            <div id="xpTexto" class="xp-texto">XP: 0 / 0 min</div> <!-- ← ESSENCIAL -->
+          </div>
+          <div id="nivelMascote" class="xp-nivel">1</div>
+        </div>
+        
+      </div>
+      <br>
+
+      
+      
+
+    <div class="form-config">
+      <input type="text" id="novaMateria" placeholder="Nova matéria">
+      <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="1">
+      <button onclick="adicionarMateria()">Adicionar</button>
+    </div>
+    
+    <div class="controle-pomodoro">
+      <select id="materiaAtual"></select>
+      
+      <div id="timer">00:00:00</div>
+  <button onclick="iniciarEstudo()"><i class="fas fa-play"></i> Iniciar</button>
+  <button onclick="pararEstudo()"><i class="fas fa-stop"></i> Parar</button>
+
+      
+    </div>
+    
+    <h2>Metas</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Matéria</th>
+          <th>Meta (h)</th>
+          <th>Estudado (min)</th>
+        </tr>
+      </thead>
+      <tbody id="tabelaMetas"></tbody>
+    </table>
+  </div>
+<button id="editarMateriasBtn" onclick="ativarModoEdicao()">
+  <img src="images/icones/pincel.png" alt="Lápis" class="icone-pixel"> Editar matérias
+</button>
+<div id="modoEdicao" style="display: none; margin-top: 20px;">
+  <table>
+    <thead>
+      <tr>
+        <th>Matéria</th>
+        <th>Meta (h)</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabelaEdicao"></tbody>
+  </table>
+  <button onclick="salvarEdicoes()">💾 Salvar alterações</button>
+</div>
+
+
+
+  <script type="module" src="script_firebase_corrigido_final.js"></script>
+</body>
+</html>
