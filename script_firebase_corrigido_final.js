@@ -20,7 +20,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 let uid = null;
-const usuarioRef = doc(db, "usuarios", uid);
+let usuarioRef = null;
 const auth = getAuth(app);
 
 
