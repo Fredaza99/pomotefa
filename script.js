@@ -482,3 +482,12 @@ function verificarConquistas() {
 atualizarTimerDisplay();
 carregarDoLocalStorage();
 atualizarResumoEstudos();
+
+
+document.addEventListener("DOMContentLoaded", () => {
+  const btnLogar = document.getElementById("btn-logar");
+  const btnRegistrar = document.getElementById("btn-registrar");
+
+  if (btnLogar) btnLogar.addEventListener("click", window.logar);
+  if (btnRegistrar) btnRegistrar.addEventListener("click", window.registrar);
+});

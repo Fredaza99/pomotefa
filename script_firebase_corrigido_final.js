@@ -19,13 +19,21 @@ const firebaseConfig = {
 // Inicialização
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-let uid = null;
 let usuarioRef = null;
+let usuarioLogado = null;
+
+let uid = null;
+
+
 const auth = getAuth(app);
 
 
 // Carregar do Firebase
 async function carregarDoFirebase() {
+  if (!usuarioRef) {
+    console.warn("Tentativa de acessar dados sem usuário logado.");
+    return;
+  }
   const snap = await getDoc(usuarioRef); 
   if (snap.exists()) {
     const dados = snap.data();
@@ -48,23 +56,47 @@ async function carregarDoFirebase() {
   }
 }
 
-// Salvar no Firebase
-async function salvarNoFirebase() {
-  const hoje = new Date().toISOString().split("T")[0];
-  await updateDoc(usuarioRef, {
-    materias: materias,
-    conquistas: conquistas,
-    progressoExtra: progressoExtra,
-    [`diasEstudados.${hoje}`]: increment(1)
-  });
+
+
+
+async function salvarNoFirebase(dados) {
+  if (!usuarioRef) return;
+
+  if (!dados || typeof dados !== "object") {
+    console.warn("⚠️ Dados inválidos para salvar no Firebase:", dados);
+    return;
+  }
+
+  try {
+    const docSnap = await getDoc(usuarioRef);
+    if (docSnap.exists()) {
+      await updateDoc(usuarioRef, dados);
+    } else {
+      await setDoc(usuarioRef, dados);
+    }
+  } catch (erro) {
+    console.error("Erro ao salvar dados no Firestore:", erro);
+  }
+}
+
+
+function gerarDadosParaSalvar() {
+  return {
+    materias: materias || {},
+    conquistas: conquistas || {},
+    progressoExtra: progressoExtra || 0,
+    diasEstudados: diasEstudados || {}
+  };
 }
 
 
 
 
 
-
 let materias = {};
+
+let diasEstudados = {};
+
 let timer = null;
 let tempoDecorrido = 0;
 let materiaSelecionada = "";
@@ -78,20 +110,13 @@ if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
   }
 
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      uid = user.uid;
-      usuarioRef = doc(db, "usuarios", uid);
-      document.getElementById("login-container").style.display = "none";
-      carregarDoFirebase();
-    } else {
-      console.log("Usuário deslogado");
-    }
-  });
+
+
+
   
   
 
-  function registrar() {
+  export function registrar() {
     const email = document.getElementById("email").value;
     const senha = document.getElementById("senha").value;
   
@@ -104,21 +129,21 @@ if ("Notification" in window && Notification.permission !== "granted") {
       });
   }
   
-  function logar() {
-    const email = document.getElementById("email").value;
-    const senha = document.getElementById("senha").value;
-  
-    signInWithEmailAndPassword(auth, email, senha)
-      .then((userCredential) => {
-        console.log("Usuário logado:", userCredential.user.uid);
-      })
-      .catch((error) => {
-        console.error("Erro ao entrar:", error.message);
-      });
+export async function logar() {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
+
+  try {
+    const credenciais = await signInWithEmailAndPassword(auth, email, senha);
+    console.log("Usuário logado:", credenciais.user.uid);
+  } catch (erro) {
+    console.error("Erro ao logar:", erro.message);
   }
+}
   
   
-const conquistas = {
+let conquistas = {
+
   primeiraMeta: {
     titulo: "Primeira matéria concluída",
     descricao: "Complete a meta de uma matéria pela primeira vez.",
@@ -267,7 +292,7 @@ function verificarMaratona(dias) {
         }
         verificarMaratona(diasEstudados);
 
-        salvarNoFirebase();
+        salvarNoFirebase(gerarDadosParaSalvar());
         atualizarTabela();
         atualizarMascote();
         atualizarResumoEstudos();
@@ -303,7 +328,7 @@ function adicionarMateria() {
   materias[nome] = { metaHoras: meta, minutosEstudados: 0 };
   atualizarSelect();
   atualizarTabela();
-  salvarNoFirebase();
+  salvarNoFirebase(gerarDadosParaSalvar());
   atualizarResumoEstudos();
   atualizarMascote();
     document.getElementById("novaMateria").value = "";
@@ -357,7 +382,7 @@ function concluirMeta(materiaNome) {
   materia.metaConcluida = false;
 
   // 💾 Atualizações visuais e armazenamento
-  salvarNoFirebase();
+  salvarNoFirebase(gerarDadosParaSalvar());
   atualizarTabela();
   atualizarResumoEstudos();
   atualizarMascote();
@@ -523,7 +548,7 @@ function verificarConquistas() {
     }
   
     materias = novasMaterias;
-    salvarNoFirebase();
+    salvarNoFirebase(gerarDadosParaSalvar());
     atualizarTabela();
     atualizarSelect();
     atualizarResumoEstudos();
@@ -539,7 +564,7 @@ function verificarConquistas() {
         progressoExtra += materias[nome].minutosEstudados;
       }
       delete materias[nome];
-      salvarNoFirebase();
+      salvarNoFirebase(gerarDadosParaSalvar());
       ativarModoEdicao();
     }
   }
@@ -552,10 +577,9 @@ function verificarConquistas() {
   
   
 
-// Iniciar com tempo padrão
-atualizarTimerDisplay();
-carregarDoFirebase();
-atualizarResumoEstudos();
+
+
+
 
 
 
@@ -572,9 +596,22 @@ window.excluirMateria = excluirMateria;
 window.ativarModoEdicao = ativarModoEdicao;
 
 
+let firebasePronto = false;
 
-window.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("btn-registrar").addEventListener("click", registrar);
-  document.getElementById("btn-logar").addEventListener("click", logar);
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    usuarioLogado = user;
+    usuarioRef = doc(db, "usuarios", user.uid);
+    firebasePronto = true;
+
+    console.log("Usuário autenticado:", user.email);
+    atualizarTimerDisplay();
+    carregarDoFirebase();
+    atualizarResumoEstudos();
+  } else {
+    console.warn("Usuário deslogado");
+  }
+  document.body.classList.remove("oculto");
+
 });
 

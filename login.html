@@ -15,58 +15,61 @@
   <link rel="stylesheet" href="login.css">
 </head>
 <body>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-    
-        const firebaseConfig = {
-          apiKey: "AIzaSyARWCI-yDweVjmZWc99GZFsFB8A4tnZDaY",
-          authDomain: "pomotefa.firebaseapp.com",
-          projectId: "pomotefa",
-          storageBucket: "pomotefa.firebasestorage.app",
-          messagingSenderId: "759701977199",
-          appId: "1:759701977199:web:c9b2c6bbdd73900e89b59a",
-          measurementId: "G-HZZ9KXB1MD"
-        };
-    
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-    
-        document.getElementById("btn-registrar").addEventListener("click", () => {
-          const email = document.getElementById("email").value;
-          const senha = document.getElementById("senha").value;
-    
-          createUserWithEmailAndPassword(auth, email, senha)
-            .then((userCredential) => {
-              alert("Conta criada! Redirecionando...");
-              window.location.href = "index.html";
-            })
-            .catch((error) => {
-              alert("Erro ao registrar: " + error.message);
-            });
-        });
-    
-        document.getElementById("btn-logar").addEventListener("click", () => {
-          const email = document.getElementById("email").value;
-          const senha = document.getElementById("senha").value;
-    
-          signInWithEmailAndPassword(auth, email, senha)
-            .then((userCredential) => {
-              alert("Login realizado com sucesso!");
-              window.location.href = "index.html";
-            })
-            .catch((error) => {
-              alert("Erro ao entrar: " + error.message);
-            });
-        });
-    
-        // Se o usuário já estiver logado, redireciona direto
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            window.location.href = "index.html";
-          }
-        });
-      </script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyARWCI-yDweVjmZWc99GZFsFB8A4tnZDaY",
+    authDomain: "pomotefa.firebaseapp.com",
+    projectId: "pomotefa",
+    storageBucket: "pomotefa.firebasestorage.app",
+    messagingSenderId: "759701977199",
+    appId: "1:759701977199:web:c9b2c6bbdd73900e89b59a",
+    measurementId: "G-HZZ9KXB1MD"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+
+  document.getElementById("btn-registrar").addEventListener("click", () => {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+
+    createUserWithEmailAndPassword(auth, email, senha)
+      .then((userCredential) => {
+        alert("Conta criada! Redirecionando...");
+        window.location.href = "index.html";
+      })
+      .catch((error) => {
+        alert("Erro ao registrar: " + error.message);
+      });
+  });
+
+  document.getElementById("btn-logar").addEventListener("click", () => {
+    const email = document.getElementById("email").value;
+    const senha = document.getElementById("senha").value;
+
+    signInWithEmailAndPassword(auth, email, senha)
+      .then((userCredential) => {
+        alert("Login realizado com sucesso!");
+        window.location.href = "index.html";
+      })
+      .catch((error) => {
+        alert("Erro ao entrar: " + error.message);
+      });
+  });
+
+  // Se o usuário já estiver logado, redireciona direto
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      window.location.href = "index.html";
+    }
+  });
+</script>
+
+ 
 
 
 <main class="main-layout">
@@ -119,6 +122,6 @@
   
   
 
-  <script type="module" src="script_firebase_corrigido_final.js"></script>
+<script type="module" src="script_firebase_corrigido_final.js" defer></script>
 </body>
 </html>
