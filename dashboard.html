@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Analytics - Pomotefa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icones/favicon-32x32.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <h1><i class="fas fa-chart-line"></i> Dashboard Analytics</h1>
+      <nav class="dashboard-nav">
+        <a href="app.html" class="nav-btn"><i class="fas fa-home"></i> App</a>
+        <a href="perfil.html" class="nav-btn"><i class="fas fa-user"></i> Perfil</a>
+        <button class="nav-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </header>
+
+    <main class="dashboard-main">
+      <!-- KPI Cards -->
+      <section class="kpi-section">
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-clock"></i></div>
+          <div class="kpi-content">
+            <h3>Total de Horas</h3>
+            <p id="total-hours-kpi">0h</p>
+            <span class="kpi-trend positive">+12% esta semana</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-fire"></i></div>
+          <div class="kpi-content">
+            <h3>Streak Atual</h3>
+            <p id="streak-kpi">0 dias</p>
+            <span class="kpi-trend positive">Mantendo ritmo!</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-trophy"></i></div>
+          <div class="kpi-content">
+            <h3>Conquistas</h3>
+            <p id="achievements-kpi">0/3</p>
+            <span class="kpi-trend neutral">Próxima em 2h</span>
+          </div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-icon"><i class="fas fa-target"></i></div>
+          <div class="kpi-content">
+            <h3>Eficiência</h3>
+            <p id="efficiency-kpi">85%</p>
+            <span class="kpi-trend positive">+5% vs. mês passado</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Charts Section -->
+      <section class="charts-section">
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3><i class="fas fa-chart-area"></i> Produtividade Semanal</h3>
+            <div class="chart-controls">
+              <button class="chart-btn active" data-period="7">7 dias</button>
+              <button class="chart-btn" data-period="30">30 dias</button>
+              <button class="chart-btn" data-period="90">90 dias</button>
+            </div>
+          </div>
+          <canvas id="productivityChart"></canvas>
+        </div>
+
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3><i class="fas fa-pie-chart"></i> Distribuição por Matéria</h3>
+          </div>
+          <canvas id="subjectChart"></canvas>
+        </div>
+      </section>
+
+      <!-- Heatmap Section -->
+      <section class="heatmap-section">
+        <div class="chart-container full-width">
+          <div class="chart-header">
+            <h3><i class="fas fa-calendar-alt"></i> Heatmap de Atividade</h3>
+            <p class="chart-subtitle">Padrão de estudos dos últimos 365 dias</p>
+          </div>
+          <div id="heatmapContainer" class="heatmap-container">
+            <!-- Heatmap será gerado via JavaScript -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Performance Metrics -->
+      <section class="metrics-section">
+        <div class="metric-card">
+          <h4>Melhor Dia da Semana</h4>
+          <p id="best-day">Segunda-feira</p>
+          <small>Média: 4.2h</small>
+        </div>
+        <div class="metric-card">
+          <h4>Horário Mais Produtivo</h4>
+          <p id="best-time">14:00 - 16:00</p>
+          <small>Pico de concentração</small>
+        </div>
+        <div class="metric-card">
+          <h4>Meta Mensal</h4>
+          <p id="monthly-goal">78%</p>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: 78%"></div>
+          </div>
+        </div>
+        <div class="metric-card">
+          <h4>Tempo Médio/Sessão</h4>
+          <p id="avg-session">1h 23min</p>
+          <small>+8min vs. média</small>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="dashboard.js"></script>
+</body>
+</html>

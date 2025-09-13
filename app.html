@@ -21,18 +21,40 @@
   
   
   
-  <div class="container">
-    <div class="resumo-e-conquistas">
-      <div id="resumoEstudos" class="tooltip-wrapper">
-<span class="tooltip-text">
-  <img src="images/icones/book.png" alt="Livro" class="icone-pixel-book">
-  TOTAL ESTUDADO: <span id="totalHoras">0</span> horas
-</span>
-
-        <div class="tooltip-detalhes" id="tooltipDetalhes"></div>
+  <div class="app-container">
+    <!-- Header Navigation -->
+    <header class="app-header">
+      <div class="header-left">
+        <h1>POMOTEFA<img src="images/icones/star.png" alt="Estrela" class="icone-pixel-star"></h1>
+        <div class="header-stats">
+          <span id="headerTotalHoras">0 horas estudadas</span>
+        </div>
       </div>
-      <button class="btn-conquistas" onclick="abrirModalConquistas()">🏆 Ver Conquistas</button>
-    </div>
+      <nav class="app-nav">
+        <button class="nav-btn" onclick="abrirModalConquistas()"><i class="fas fa-trophy"></i> Conquistas</button>
+        <button class="nav-btn" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</button>
+        <button class="nav-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-line"></i> Dashboard</button>
+        <button class="nav-btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="app-main">
+      <!-- Avatar Section -->
+      <section class="avatar-section">
+        <div class="avatar-card">
+          <div class="mascote-container">
+            <img id="mascoteImg" src="images/mascote1.webp" alt="Mascote" width="200">
+            <div class="xp-container">
+              <div class="xp-bar">
+                <div id="xpMascote" class="xp-fill"></div>
+                <div id="xpTexto" class="xp-texto">XP: 0 / 0 min</div>
+              </div>
+              <div id="nivelMascote" class="xp-nivel">1</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
 <div id="modalConquistas" class="modal">
   <div class="modal-content">
@@ -46,68 +68,85 @@
   </div>
 </div>
 
-
-<h1>POMOTEFA<img src="images/icones/star.png" alt="Estrela" class="icone-pixel-star"></h1>
-    <div class="mascote-container">
-        <img id="mascoteImg" src="images/mascote1.webp" alt="Mascote" width="120">
-        <div class="xp-container">
-          <div class="xp-bar">
-            <div id="xpMascote" class="xp-fill"></div>
-            <div id="xpTexto" class="xp-texto">XP: 0 / 0 min</div> <!-- ← ESSENCIAL -->
+      <!-- Timer Section -->
+      <section class="timer-section">
+        <div class="timer-card">
+          <div class="timer-display">
+            <div id="timer">00:00:00</div>
           </div>
-          <div id="nivelMascote" class="xp-nivel">1</div>
+          <div class="timer-controls">
+            <select id="materiaAtual" class="materia-select"></select>
+            <div class="control-buttons">
+              <button onclick="iniciarEstudo()" class="control-btn start-btn">
+                <i class="fas fa-play"></i> Iniciar
+              </button>
+              <button onclick="pararEstudo()" class="control-btn stop-btn">
+                <i class="fas fa-stop"></i> Parar
+              </button>
+            </div>
+            <div class="timer-add-subject">
+              <h4><i class="fas fa-plus"></i> Adicionar Nova Matéria</h4>
+              <div class="form-config">
+                <input type="text" id="novaMateria" placeholder="Nome da matéria">
+                <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="1">
+                <button onclick="adicionarMateria()" class="add-btn">
+                  <i class="fas fa-plus"></i> Adicionar
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-        
+      </section>
+
+
+      <!-- Goals Table Section -->
+      <section class="goals-section">
+        <div class="table-card">
+          <div class="table-header">
+            <h3><i class="fas fa-target"></i> Metas de Estudo</h3>
+            <button id="editarMateriasBtn" onclick="ativarModoEdicao()" class="edit-btn">
+              <i class="fas fa-edit"></i> Editar
+            </button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Matéria</th>
+                  <th>Meta (h)</th>
+                  <th>Estudado (min)</th>
+                </tr>
+              </thead>
+              <tbody id="tabelaMetas"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Edit Mode Modal -->
+    <div id="modoEdicao" class="modal" style="display: none;">
+      <div class="modal-content">
+        <span class="close" onclick="document.getElementById('modoEdicao').style.display='none'">×</span>
+        <h2><i class="fas fa-edit"></i> Editar Matérias</h2>
+        <div class="edit-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Matéria</th>
+                <th>Meta (h)</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaEdicao"></tbody>
+          </table>
+        </div>
+        <button onclick="salvarEdicoes()" class="save-btn">
+          <i class="fas fa-save"></i> Salvar alterações
+        </button>
       </div>
-      <br>
-
-      
-      
-
-    <div class="form-config">
-      <input type="text" id="novaMateria" placeholder="Nova matéria">
-      <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="1">
-      <button onclick="adicionarMateria()">Adicionar</button>
     </div>
-    
-    <div class="controle-pomodoro">
-      <select id="materiaAtual"></select>
-      
-      <div id="timer">00:00:00</div>
-  <button onclick="iniciarEstudo()"><i class="fas fa-play"></i> Iniciar</button>
-  <button onclick="pararEstudo()"><i class="fas fa-stop"></i> Parar</button>
-
-      
-    </div>
-    
-    <h2 class="titulo-table"> Metas</h2>
-    <table>
-      <thead>
-        <tr>
-          <th>Matéria</th>
-          <th>Meta (h)</th>
-          <th>Estudado (min)</th>
-        </tr>
-      </thead>
-      <tbody id="tabelaMetas"></tbody>
-    </table>
   </div>
-<button id="editarMateriasBtn" onclick="ativarModoEdicao()">
-  <img src="images/icones/pincel.png" alt="Lápis" class="icone-pixel"> Editar matérias
-</button>
-<div id="modoEdicao" style="display: none; margin-top: 20px;">
-  <table>
-    <thead>
-      <tr>
-        <th>Matéria</th>
-        <th>Meta (h)</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabelaEdicao"></tbody>
-  </table>
-  <button onclick="salvarEdicoes()">💾 Salvar alterações</button>
-</div>
 <canvas id="backgroundCanvas"></canvas> <!-- Canvas como fundo -->
 <script>
 

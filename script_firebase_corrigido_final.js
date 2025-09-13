@@ -2,7 +2,7 @@
 // Firebase SDKs
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
 import { getFirestore, doc, setDoc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 
 // Configuração do Firebase
@@ -136,8 +136,19 @@ export async function logar() {
   try {
     const credenciais = await signInWithEmailAndPassword(auth, email, senha);
     console.log("Usuário logado:", credenciais.user.uid);
+    window.location.href = 'perfil.html'; // Redireciona para o perfil
   } catch (erro) {
     console.error("Erro ao logar:", erro.message);
+  }
+}
+
+export async function logout() {
+  try {
+    await signOut(auth);
+    console.log("Usuário deslogado com sucesso");
+    window.location.href = 'index.html'; // Redireciona para a página de login
+  } catch (erro) {
+    console.error("Erro ao fazer logout:", erro.message);
   }
 }
   
@@ -440,10 +451,15 @@ function verificarConquistas() {
   
     const resumoEl = document.getElementById("resumoEstudos");
     const totalEl = document.getElementById("totalHoras");
+    const headerTotalEl = document.getElementById("headerTotalHoras");
     const tooltipDetalhes = document.getElementById("tooltipDetalhes");
   
     if (resumoEl && totalEl) {
-      totalEl.textContent = totalHoras;
+      totalEl.textContent = `${totalHoras} horas`;
+    }
+    
+    if (headerTotalEl) {
+      headerTotalEl.textContent = `${totalHoras} horas estudadas`;
     }
   
     if (tooltipDetalhes) {
@@ -599,6 +615,7 @@ verificarFirefox();
 
 window.registrar = registrar;
 window.logar = logar;
+window.logout = logout;
 window.adicionarMateria = adicionarMateria;
 window.abrirModalConquistas = abrirModalConquistas;
 window.fecharModalConquistas = fecharModalConquistas;
@@ -615,6 +632,7 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     usuarioLogado = user;
     usuarioRef = doc(db, "usuarios", user.uid);
+    carregarDoFirebase(); // Carregar dados quando usuário estiver logado
     firebasePronto = true;
 
     console.log("Usuário autenticado:", user.email);

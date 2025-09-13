@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil de Estudante - Pomotefa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icones/favicon-32x32.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="perfil.css">
+</head>
+<body>
+  <div class="container-perfil">
+    <header class="perfil-header">
+      <img id="user-avatar" src="images/mascote1.webp" alt="Avatar do Usuário" class="avatar">
+      <h1 id="user-name">Carregando...</h1>
+      <div class="header-buttons">
+        <a href="app.html" class="btn-voltar">Voltar ao App</a>
+        <a href="dashboard.html" class="btn-voltar">📊 Dashboard</a>
+        <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+      </div>
+    </header>
+
+    <main class="perfil-main">
+      <section class="stats-grid">
+        <div class="stat-card">
+          <h3>Rank Atual</h3>
+          <p id="user-rank">-</p>
+          <i class="fas fa-trophy"></i>
+        </div>
+        <div class="stat-card">
+          <h3>Conquistas</h3>
+          <p id="user-achievements">0</p>
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-card">
+          <h3>Streak de Estudo</h3>
+          <p id="user-streak">0 dias</p>
+          <i class="fas fa-fire"></i>
+        </div>
+        <div class="stat-card">
+          <h3>Matéria Favorita</h3>
+          <p id="user-fav-subject">-</p>
+          <i class="fas fa-book"></i>
+        </div>
+      </section>
+
+      <section class="recent-achievements">
+        <h2>Conquistas Recentes</h2>
+        <div id="recent-achievements-list" class="achievements-list">
+          <!-- Conquistas serão inseridas aqui pelo JavaScript -->
+        </div>
+      </section>
+
+      <section class="total-hours">
+        <h2>Total de Horas Estudadas</h2>
+        <div class="progress-bar-container">
+          <div id="total-hours-bar" class="progress-bar"></div>
+        </div>
+        <p id="total-hours-text">0 horas</p>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="perfil.js"></script>
+</body>
+</html>
