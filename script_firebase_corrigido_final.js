@@ -91,44 +91,51 @@ function gerarDadosParaSalvar() {
 
 
 
-
-
 let materias = {};
 
 let diasEstudados = {};
 
-let timer = null;
-let tempoDecorrido = 0;
+let timerInterval;
+let tempoRestante = 0;
+let timerAtivo = false;
+
+// Variáveis do Modo de Foco
+let focusMode = false;
+let focusTimer = null;
+let currentCycle = 1;
+let currentSession = 'focus'; // 'focus' ou 'break'
+let focusTimeRemaining = 30 * 60; // 30 minutos em segundos
+let isBreakTime = false;
+
+// Configuração dos ciclos Pomodoro
+const pomodoroConfig = {
+  focusTime: 30 * 60, // 30 minutos
+  shortBreak: 5 * 60, // 5 minutos
+  longBreak: 25 * 60, // 25 minutos (20-30 min)
+  totalCycles: 4
+};
+
 let materiaSelecionada = "";
 let segundosAcumulados = 0;
 let progressoExtra = 0;
 
-
-
-
 if ("Notification" in window && Notification.permission !== "granted") {
     Notification.requestPermission();
-  }
+}
 
+export function registrar() {
+  const email = document.getElementById("email").value;
+  const senha = document.getElementById("senha").value;
 
+  createUserWithEmailAndPassword(auth, email, senha)
+    .then((userCredential) => {
+      console.log("Usuário registrado:", userCredential.user.uid);
+    })
+    .catch((error) => {
+      console.error("Erro ao registrar:", error.message);
+    });
+}
 
-
-  
-  
-
-  export function registrar() {
-    const email = document.getElementById("email").value;
-    const senha = document.getElementById("senha").value;
-  
-    createUserWithEmailAndPassword(auth, email, senha)
-      .then((userCredential) => {
-        console.log("Usuário registrado:", userCredential.user.uid);
-      })
-      .catch((error) => {
-        console.error("Erro ao registrar:", error.message);
-      });
-  }
-  
 export async function logar() {
   const email = document.getElementById("email").value;
   const senha = document.getElementById("senha").value;
@@ -151,10 +158,8 @@ export async function logout() {
     console.error("Erro ao fazer logout:", erro.message);
   }
 }
-  
-  
-let conquistas = {
 
+let conquistas = {
   primeiraMeta: {
     titulo: "Primeira matéria concluída",
     descricao: "Complete a meta de uma matéria pela primeira vez.",
@@ -184,9 +189,6 @@ if (conquistasSalvas) {
     }
   }
 }
-
-
-
 
 function abrirModalConquistas() {
   atualizarConquistas();
@@ -229,8 +231,6 @@ function atualizarConquistas() {
   }
 }
 
-
-
 function desbloquearConquista(id) {
   if (!conquistas[id].desbloqueada) {
     conquistas[id].desbloqueada = true;
@@ -253,83 +253,78 @@ function verificarMaratona(dias) {
   }
 }
 
+function iniciarEstudo() {
+  materiaSelecionada = document.getElementById("materiaAtual").value;
+  if (!materiaSelecionada || !materias[materiaSelecionada]) return;
 
+  if (timerInterval) return; // Já está rodando
 
-  function iniciarEstudo() {
-    materiaSelecionada = document.getElementById("materiaAtual").value;
-    if (!materiaSelecionada || !materias[materiaSelecionada]) return;
-  
-    if (timer) return; // Já está rodando
-  
-    timer = setInterval(() => {
-      tempoDecorrido++;
-      segundosAcumulados++;
-  
-      atualizarTimerDisplay();
-  
-      // A cada 60 segundos, somamos 1 minuto à matéria
-      if (segundosAcumulados >= 60) {
-        materias[materiaSelecionada].minutosEstudados += 1;
-        segundosAcumulados = 0;
+  timerInterval = setInterval(() => {
+    tempoRestante++;
+    segundosAcumulados++;
 
-        // ✅ Desbloqueios automáticos (seguros)
-        const materia = materias[materiaSelecionada];
-        if (
-          materia &&
-          materia.minutosEstudados >= materia.metaHoras * 60 &&
-          !materia.metaConcluida
-        ) {
-          materia.metaConcluida = true;
-          concluirMeta(materiaSelecionada);
+    atualizarTimerDisplay();
 
-          if (!conquistas.primeiraMeta.desbloqueada) {
-            desbloquearConquista("primeiraMeta");
-          }
+    // A cada 60 segundos, somamos 1 minuto à matéria
+    if (segundosAcumulados >= 60) {
+      materias[materiaSelecionada].minutosEstudados += 1;
+      segundosAcumulados = 0;
+
+      // ✅ Desbloqueios automáticos (seguros)
+      const materia = materias[materiaSelecionada];
+      if (
+        materia &&
+        materia.minutosEstudados >= materia.metaHoras * 60 &&
+        !materia.metaConcluida
+      ) {
+        materia.metaConcluida = true;
+        concluirMeta(materiaSelecionada);
+
+        if (!conquistas.primeiraMeta.desbloqueada) {
+          desbloquearConquista("primeiraMeta");
         }
-
-        const hoje = new Date().toLocaleDateString();
-        let minutosHoje = parseInt(null || "0");
-        minutosHoje += 1;
-        // removido localStorage.setItem
-
-        if (minutosHoje >= 480 && !conquistas.esforcoDiario.desbloqueada) {
-          desbloquearConquista("esforcoDiario");
-        }
-
-        let diasEstudados = [];
-        if (!diasEstudados.includes(hoje)) {
-          diasEstudados.push(hoje);
-          // removido localStorage.setItem
-        }
-        verificarMaratona(diasEstudados);
-
-        salvarNoFirebase(gerarDadosParaSalvar());
-        atualizarTabela();
-        atualizarMascote();
-        atualizarResumoEstudos();
       }
 
-    
-    }, 1000);
-  }
-  
-  function pararEstudo() {
-    clearInterval(timer);
-    timer = null;
-  }
-  
-  function atualizarTimerDisplay() {
-    const horas = Math.floor(tempoDecorrido / 3600);
-    const minutos = Math.floor((tempoDecorrido % 3600) / 60);
-    const segundos = tempoDecorrido % 60;
-  
-    const tempoFormatado = 
-      `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
-  
-    document.getElementById("timer").textContent = tempoFormatado;
-    document.title = timer ? ` ${tempoFormatado} - Pomotefa` : 'Pomotefa';
-  }
-  
+      const hoje = new Date().toLocaleDateString();
+      let minutosHoje = parseInt(null || "0");
+      minutosHoje += 1;
+      // removido localStorage.setItem
+
+      if (minutosHoje >= 480 && !conquistas.esforcoDiario.desbloqueada) {
+        desbloquearConquista("esforcoDiario");
+      }
+
+      let diasEstudados = [];
+      if (!diasEstudados.includes(hoje)) {
+        diasEstudados.push(hoje);
+        // removido localStorage.setItem
+      }
+      verificarMaratona(diasEstudados);
+
+      salvarNoFirebase(gerarDadosParaSalvar());
+      atualizarTabela();
+      atualizarMascote();
+      atualizarResumoEstudos();
+    }
+  }, 1000);
+}
+
+function pararEstudo() {
+  clearInterval(timerInterval);
+  timerInterval = null;
+}
+
+function atualizarTimerDisplay() {
+  const horas = Math.floor(tempoRestante / 3600);
+  const minutos = Math.floor((tempoRestante % 3600) / 60);
+  const segundos = tempoRestante % 60;
+
+  const tempoFormatado = 
+    `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
+
+  document.getElementById("timer").textContent = tempoFormatado;
+  document.title = timerInterval ? ` ${tempoFormatado} - Pomotefa` : 'Pomotefa';
+}
 
 function adicionarMateria() {
   const nome = document.getElementById("novaMateria").value.trim();
@@ -342,7 +337,7 @@ function adicionarMateria() {
   salvarNoFirebase(gerarDadosParaSalvar());
   atualizarResumoEstudos();
   atualizarMascote();
-    document.getElementById("novaMateria").value = "";
+  document.getElementById("novaMateria").value = "";
   document.getElementById("metaHoras").value = "";
 }
 
@@ -372,12 +367,8 @@ function atualizarTabela() {
     <td>${minutosEstudados}</td>
   </tr>
 `;
-
-
   }
 }
-
-
 
 function concluirMeta(materiaNome) {
   const materia = materias[materiaNome];
@@ -399,21 +390,226 @@ function concluirMeta(materiaNome) {
   atualizarMascote();
 }
 
-
 function mostrarToast(mensagem) {
-  const toast = document.createElement("div");
-  toast.className = "toast-sucesso";
+  const toast = document.getElementById("toastSucesso");
   toast.textContent = mensagem;
-  document.body.appendChild(toast);
-
+  toast.classList.add("visivel");
+  
   setTimeout(() => {
-    toast.classList.add("visivel");
-    setTimeout(() => {
-      toast.classList.remove("visivel");
-      setTimeout(() => toast.remove(), 300);
-    }, 3000);
-  }, 100);
+    toast.classList.remove("visivel");
+  }, 3000);
 }
+
+// ===== FUNÇÕES DO MODO DE FOCO =====
+
+// Entrar no modo de foco
+function enterFocusMode() {
+  if (timerInterval) {
+    alert('Pare o timer atual antes de entrar no modo de foco.');
+    return;
+  }
+  
+  focusMode = true;
+  currentCycle = 1;
+  currentSession = 'focus';
+  focusTimeRemaining = pomodoroConfig.focusTime;
+  isBreakTime = false;
+  
+  updateFocusDisplay();
+  document.getElementById('focusOverlay').classList.add('active');
+}
+
+// Sair do modo de foco
+function exitFocusMode() {
+  focusMode = false;
+  if (focusTimer) {
+    clearInterval(focusTimer);
+    focusTimer = null;
+  }
+  document.getElementById('focusOverlay').classList.remove('active');
+  resetFocusState();
+}
+
+// Resetar estado do foco
+function resetFocusState() {
+  currentCycle = 1;
+  currentSession = 'focus';
+  focusTimeRemaining = pomodoroConfig.focusTime;
+  isBreakTime = false;
+  updateFocusDisplay();
+}
+
+// Toggle do timer de foco
+function toggleFocusTimer() {
+  const playPauseBtn = document.getElementById('focusPlayPause');
+  
+  if (focusTimer) {
+    // Pausar
+    clearInterval(focusTimer);
+    focusTimer = null;
+    playPauseBtn.innerHTML = '<i class="fas fa-play"></i> Continuar';
+  } else {
+    // Iniciar/Continuar
+    startFocusTimer();
+    playPauseBtn.innerHTML = '<i class="fas fa-pause"></i> Pausar';
+  }
+}
+
+// Iniciar timer de foco
+function startFocusTimer() {
+  focusTimer = setInterval(() => {
+    focusTimeRemaining--;
+    updateFocusDisplay();
+    
+    if (focusTimeRemaining <= 0) {
+      handleFocusSessionComplete();
+    }
+  }, 1000);
+}
+
+// Lidar com sessão completa
+function handleFocusSessionComplete() {
+  clearInterval(focusTimer);
+  focusTimer = null;
+  
+  // Tocar som de notificação
+  playNotificationSound();
+  
+  if (currentSession === 'focus') {
+    // Sessão de foco completa, iniciar pausa
+    if (currentCycle === pomodoroConfig.totalCycles) {
+      // Pausa longa após 4º ciclo
+      focusTimeRemaining = pomodoroConfig.longBreak;
+      currentSession = 'longBreak';
+    } else {
+      // Pausa curta
+      focusTimeRemaining = pomodoroConfig.shortBreak;
+      currentSession = 'shortBreak';
+    }
+    isBreakTime = true;
+    
+    // Registrar tempo estudado
+    const materiaAtual = document.getElementById('materiaAtual').value;
+    if (materiaAtual && materias[materiaAtual]) {
+      materias[materiaAtual].minutosEstudados += 30;
+      salvarNoFirebase(gerarDadosParaSalvar());
+      atualizarResumoEstudos();
+    }
+    
+  } else {
+    // Pausa completa
+    if (currentCycle === pomodoroConfig.totalCycles) {
+      // Ciclo completo, resetar
+      mostrarToast('🎉 Ciclo Pomodoro completo! Parabéns!');
+      exitFocusMode();
+      return;
+    } else {
+      // Próximo ciclo
+      currentCycle++;
+      currentSession = 'focus';
+      focusTimeRemaining = pomodoroConfig.focusTime;
+      isBreakTime = false;
+    }
+  }
+  
+  updateFocusDisplay();
+  
+  // Auto-iniciar próxima sessão após 3 segundos
+  setTimeout(() => {
+    if (focusMode) {
+      startFocusTimer();
+      document.getElementById('focusPlayPause').innerHTML = '<i class="fas fa-pause"></i> Pausar';
+    }
+  }, 3000);
+}
+
+// Pular sessão atual
+function skipFocusSession() {
+  if (focusTimer) {
+    clearInterval(focusTimer);
+    focusTimer = null;
+  }
+  
+  focusTimeRemaining = 0;
+  handleFocusSessionComplete();
+}
+
+// Atualizar display do modo de foco
+function updateFocusDisplay() {
+  const cycleEl = document.getElementById('focusCycleNumber');
+  const sessionEl = document.getElementById('focusSessionType');
+  const timerEl = document.getElementById('focusTimerDisplay');
+  
+  cycleEl.textContent = currentCycle;
+  
+  if (currentSession === 'focus') {
+    sessionEl.textContent = 'FOCO';
+    sessionEl.style.color = '#00D4FF';
+  } else if (currentSession === 'shortBreak') {
+    sessionEl.textContent = 'PAUSA CURTA';
+    sessionEl.style.color = '#FFD700';
+  } else if (currentSession === 'longBreak') {
+    sessionEl.textContent = 'PAUSA LONGA';
+    sessionEl.style.color = '#FF6B6B';
+  }
+  
+  const minutes = Math.floor(focusTimeRemaining / 60);
+  const seconds = focusTimeRemaining % 60;
+  timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+// Tocar som de notificação
+function playNotificationSound() {
+  try {
+    const audio = new Audio();
+    if (currentSession === 'focus') {
+      audio.src = 'sounds/fim-pomodoro.mp3';
+    } else {
+      audio.src = 'sounds/fim-intervalo.mp3';
+    }
+    audio.play().catch(e => console.log('Não foi possível tocar o som:', e));
+  } catch (e) {
+    console.log('Erro ao tocar som:', e);
+  }
+}
+
+// Tornar funções globais
+window.enterFocusMode = enterFocusMode;
+window.exitFocusMode = exitFocusMode;
+window.toggleFocusTimer = toggleFocusTimer;
+window.skipFocusSession = skipFocusSession;
+
+// ===== TOOLTIP POMODORO =====
+
+// Gerenciar tooltip customizado
+document.addEventListener('DOMContentLoaded', () => {
+  const helpIcon = document.querySelector('.pomodoro-help-icon');
+  const tooltip = document.getElementById('pomodoro-info');
+  
+  if (helpIcon && tooltip) {
+    let tooltipTimeout;
+    
+    helpIcon.addEventListener('mouseenter', () => {
+      clearTimeout(tooltipTimeout);
+      tooltip.classList.add('show');
+    });
+    
+    helpIcon.addEventListener('mouseleave', () => {
+      tooltipTimeout = setTimeout(() => {
+        tooltip.classList.remove('show');
+      }, 200);
+    });
+    
+    // Manter tooltip visível quando hover sobre ele
+    tooltip.addEventListener('mouseenter', () => {
+      clearTimeout(tooltipTimeout);
+    });
+    
+    tooltip.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('show');
+    });
+  }
+});
 
 
 

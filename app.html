@@ -83,6 +83,23 @@
               <button onclick="pararEstudo()" class="control-btn stop-btn">
                 <i class="fas fa-stop"></i> Parar
               </button>
+              <button onclick="enterFocusMode()" class="control-btn focus-btn">
+                <i class="fas fa-bullseye"></i> Modo Pomodoro
+                <i class="fas fa-question-circle pomodoro-help-icon" data-tooltip="pomodoro-info"></i>
+              </button>
+              
+              <!-- Tooltip customizado -->
+              <div id="pomodoro-info" class="custom-tooltip">
+                <div class="tooltip-content">
+                  <h4>Ciclos Pomodoro</h4>
+                  <div class="cycle-info">
+                    <div class="cycle-item">1º ciclo → 30 min foco + 5 min pausa</div>
+                    <div class="cycle-item">2º ciclo → 30 min foco + 5 min pausa</div>
+                    <div class="cycle-item">3º ciclo → 30 min foco + 5 min pausa</div>
+                    <div class="cycle-item">4º ciclo → 30 min foco + 20–30 min pausa</div>
+                  </div>
+                </div>
+              </div>
             </div>
             <div class="timer-add-subject">
               <h4><i class="fas fa-plus"></i> Adicionar Nova Matéria</h4>
@@ -119,6 +136,100 @@
               </thead>
               <tbody id="tabelaMetas"></tbody>
             </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Project Information Section -->
+      <section class="project-info-section">
+        <div class="info-container">
+          <div class="info-header">
+            <h2><i class="fas fa-info-circle"></i> Sobre o Pomotefa</h2>
+            <p class="info-subtitle">Um Timer Pomodoro online para aumentar sua produtividade</p>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-card">
+              <h3><i class="fas fa-question-circle"></i> O que é o Pomotefa?</h3>
+              <p>O Pomotefa é um timer Pomodoro personalizável que funciona em desktop e navegadores móveis. O objetivo desta aplicação é ajudá-lo a focar em qualquer tarefa em que esteja trabalhando, como estudar, escrever ou programar. Este app é inspirado na Técnica Pomodoro, que é um método de gerenciamento de tempo desenvolvido por Francesco Cirillo.</p>
+            </div>
+
+            <div class="info-card">
+              <h3><i class="fas fa-clock"></i> O que é a Técnica Pomodoro?</h3>
+              <p>A Técnica Pomodoro foi criada por Francesco Cirillo para uma forma mais produtiva de trabalhar e estudar. A técnica usa um timer para dividir o trabalho em intervalos, tradicionalmente de 25 minutos, separados por pausas curtas. Cada intervalo é conhecido como um pomodoro, da palavra italiana para 'tomate', devido ao timer de cozinha em forma de tomate que Cirillo usava quando era estudante universitário.</p>
+            </div>
+
+            <div class="info-card">
+              <h3><i class="fas fa-play-circle"></i> Como usar o Timer Pomodoro?</h3>
+              <div class="steps-list">
+                <div class="step-item">
+                  <span class="step-number">1</span>
+                  <span>Adicione matérias para estudar hoje</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">2</span>
+                  <span>Defina metas de horas semanais para cada matéria</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">3</span>
+                  <span>Selecione uma matéria para trabalhar</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">4</span>
+                  <span>Inicie o timer e foque na tarefa por 30 minutos</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">5</span>
+                  <span>Faça uma pausa de 5 minutos quando o alarme tocar</span>
+                </div>
+                <div class="step-item">
+                  <span class="step-number">6</span>
+                  <span>Repita 4 ciclos até completar suas metas</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3><i class="fas fa-star"></i> Funcionalidades Principais</h3>
+              <div class="features-grid">
+                <div class="feature-item">
+                  <i class="fas fa-chart-line"></i>
+                  <div>
+                    <strong>Dashboard Analytics:</strong> Visualize seu progresso diário, semanal e mensal com gráficos detalhados.
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-trophy"></i>
+                  <div>
+                    <strong>Sistema de Conquistas:</strong> Desbloqueie conquistas conforme atinge suas metas de estudo.
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-bullseye"></i>
+                  <div>
+                    <strong>Modo Pomodoro:</strong> Ciclos automáticos de 30min foco + pausas inteligentes (5min/25min).
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-user-circle"></i>
+                  <div>
+                    <strong>Perfil Personalizado:</strong> Acompanhe suas estatísticas e evolução ao longo do tempo.
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-cloud"></i>
+                  <div>
+                    <strong>Sincronização na Nuvem:</strong> Seus dados são salvos automaticamente no Firebase.
+                  </div>
+                </div>
+                <div class="feature-item">
+                  <i class="fas fa-gamepad"></i>
+                  <div>
+                    <strong>Gamificação:</strong> Sistema de XP, níveis e mascote que evolui com seu progresso.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -217,9 +328,28 @@
 
   createStars();
   animate();
-
-
 </script>
+
+    </div>
+  </div>
+
+  <!-- Overlay de Modo de Foco -->
+  <div id="focusOverlay" class="focus-overlay">
+    <div class="focus-timer-container">
+      <button class="focus-exit-btn" onclick="exitFocusMode()">&times;</button>
+      <div class="focus-cycle-info">Ciclo <span id="focusCycleNumber">1</span> de 4</div>
+      <div class="focus-session-type" id="focusSessionType">FOCO</div>
+      <div class="focus-timer-display" id="focusTimerDisplay">30:00</div>
+      <div class="focus-controls">
+        <button class="focus-btn" id="focusPlayPause" onclick="toggleFocusTimer()">
+          <i class="fas fa-play"></i> Iniciar
+        </button>
+        <button class="focus-btn" onclick="skipFocusSession()">
+          <i class="fas fa-forward"></i> Pular
+        </button>
+      </div>
+    </div>
+  </div>
 
   <script type="module" src="script_firebase_corrigido_final.js"></script>
 </body>

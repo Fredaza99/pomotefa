@@ -19,6 +19,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 let productivityChart, subjectChart;
+let currentDiasEstudados = {};
 
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -45,6 +46,9 @@ async function loadDashboardData(user) {
 
     // Atualizar KPIs
     updateKPIs(totalHoras, diasEstudados, conquistas, materias);
+    
+    // Armazenar dados globalmente
+    currentDiasEstudados = diasEstudados;
     
     // Criar gráficos
     createProductivityChart(diasEstudados);
@@ -110,21 +114,29 @@ function calculateEfficiency(materias) {
   return Math.round(totalEficiencia / materiasArray.length);
 }
 
-function createProductivityChart(diasEstudados) {
+function createProductivityChart(diasEstudados, period = 7) {
   const ctx = document.getElementById('productivityChart').getContext('2d');
   
-  // Gerar dados dos últimos 7 dias
+  // Gerar dados baseado no período
   const labels = [];
   const data = [];
   const today = new Date();
   
-  for (let i = 6; i >= 0; i--) {
+  for (let i = period - 1; i >= 0; i--) {
     const date = new Date(today);
     date.setDate(date.getDate() - i);
     const dateStr = date.toLocaleDateString('pt-BR');
     
-    labels.push(date.toLocaleDateString('pt-BR', { weekday: 'short' }));
-    data.push(diasEstudados[dateStr] ? Math.random() * 5 + 1 : 0); // Simulando dados
+    if (period <= 7) {
+      labels.push(date.toLocaleDateString('pt-BR', { weekday: 'short' }));
+    } else if (period <= 30) {
+      labels.push(date.getDate().toString());
+    } else {
+      labels.push(date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }));
+    }
+    
+    const minutosNoDia = diasEstudados[dateStr] || 0;
+    data.push(minutosNoDia / 60); // Converter minutos para horas
   }
 
   productivityChart = new Chart(ctx, {
@@ -134,12 +146,12 @@ function createProductivityChart(diasEstudados) {
       datasets: [{
         label: 'Horas Estudadas',
         data: data,
-        borderColor: '#FDB7EA',
-        backgroundColor: 'rgba(253, 183, 234, 0.1)',
+        borderColor: '#00D4FF',
+        backgroundColor: 'rgba(0, 212, 255, 0.1)',
         borderWidth: 3,
         fill: true,
         tension: 0.4,
-        pointBackgroundColor: '#FDB7EA',
+        pointBackgroundColor: '#00D4FF',
         pointBorderColor: '#fff',
         pointBorderWidth: 2,
         pointRadius: 6
@@ -189,8 +201,8 @@ function createSubjectChart(materias) {
   const data = Object.values(materias).map(m => m.minutosEstudados);
   
   const colors = [
-    '#FDB7EA', '#ff94fa', '#da16d0', '#b300b3', '#8a008a',
-    '#ff6b9d', '#c44569', '#f8b500', '#ff9ff3', '#54a0ff'
+    '#00D4FF', '#0099CC', '#0066AA', '#004488', '#002266',
+    '#33DDFF', '#66E6FF', '#99EEFF', '#CCF7FF', '#E6FBFF'
   ];
 
   subjectChart = new Chart(ctx, {
@@ -240,33 +252,87 @@ function createHeatmap(diasEstudados) {
     const day = document.createElement('div');
     day.className = 'heatmap-day';
     
-    // Simular níveis de atividade
-    const hasActivity = diasEstudados[dateStr];
-    if (hasActivity) {
-      const level = Math.floor(Math.random() * 4) + 1;
-      day.classList.add(`level-${level}`);
-    } else {
-      day.classList.add('level-0');
+    // Calcular nível baseado nos minutos estudados
+    const minutosNoDia = diasEstudados[dateStr] || 0;
+    let level = 0;
+    if (minutosNoDia > 0) {
+      if (minutosNoDia >= 240) level = 4; // 4+ horas
+      else if (minutosNoDia >= 180) level = 3; // 3+ horas
+      else if (minutosNoDia >= 120) level = 2; // 2+ horas
+      else level = 1; // Qualquer tempo
     }
+    day.classList.add(`level-${level}`);
     
-    day.title = `${dateStr}: ${hasActivity ? 'Estudou' : 'Não estudou'}`;
+    const horas = (minutosNoDia / 60).toFixed(1);
+    day.title = `${dateStr}: ${minutosNoDia > 0 ? horas + 'h estudadas' : 'Não estudou'}`;
     container.appendChild(day);
   }
 }
 
 function updateMetrics(materias, diasEstudados) {
-  // Simular métricas baseadas nos dados reais
   const materiasArray = Object.entries(materias);
+  const diasArray = Object.entries(diasEstudados);
   
-  if (materiasArray.length > 0) {
-    const materiaFavorita = materiasArray.reduce((prev, current) => 
-      prev[1].minutosEstudados > current[1].minutosEstudados ? prev : current
+  if (materiasArray.length > 0 && diasArray.length > 0) {
+    // Calcular melhor dia da semana
+    const diasSemana = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const estudoPorDia = new Array(7).fill(0);
+    const contadorDias = new Array(7).fill(0);
+    
+    diasArray.forEach(([dateStr, minutos]) => {
+      const [dia, mes, ano] = dateStr.split('/');
+      const date = new Date(ano, mes - 1, dia);
+      const diaSemana = date.getDay();
+      estudoPorDia[diaSemana] += minutos;
+      contadorDias[diaSemana]++;
+    });
+    
+    const mediaPorDia = estudoPorDia.map((total, i) => 
+      contadorDias[i] > 0 ? total / contadorDias[i] : 0
     );
     
-    // Atualizar métricas com dados simulados mas realistas
-    document.getElementById('best-day').textContent = 'Segunda-feira';
-    document.getElementById('best-time').textContent = '14:00 - 16:00';
-    document.getElementById('avg-session').textContent = '1h 23min';
+    const melhorDiaIndex = mediaPorDia.indexOf(Math.max(...mediaPorDia));
+    const melhorDiaHoras = (mediaPorDia[melhorDiaIndex] / 60).toFixed(1);
+    
+    document.getElementById('best-day').textContent = diasSemana[melhorDiaIndex];
+    document.querySelector('#best-day').nextElementSibling.textContent = `Média: ${melhorDiaHoras}h`;
+    
+    // Calcular tempo médio por sessão
+    const totalSessoes = diasArray.length;
+    const totalMinutos = diasArray.reduce((acc, [, minutos]) => acc + minutos, 0);
+    const mediaSessao = totalMinutos / totalSessoes;
+    const horas = Math.floor(mediaSessao / 60);
+    const minutos = Math.round(mediaSessao % 60);
+    
+    document.getElementById('avg-session').textContent = `${horas}h ${minutos}min`;
+    
+    // Calcular meta mensal (baseado nos últimos 30 dias)
+    const hoje = new Date();
+    const trintaDiasAtras = new Date(hoje.getTime() - (30 * 24 * 60 * 60 * 1000));
+    
+    let minutosUltimos30Dias = 0;
+    diasArray.forEach(([dateStr, minutos]) => {
+      const [dia, mes, ano] = dateStr.split('/');
+      const date = new Date(ano, mes - 1, dia);
+      if (date >= trintaDiasAtras) {
+        minutosUltimos30Dias += minutos;
+      }
+    });
+    
+    const horasUltimos30Dias = minutosUltimos30Dias / 60;
+    const metaMensal = 60; // Meta de 60 horas por mês
+    const progressoMeta = Math.min((horasUltimos30Dias / metaMensal) * 100, 100);
+    
+    document.getElementById('monthly-goal').textContent = `${Math.round(progressoMeta)}%`;
+    document.querySelector('.progress-fill').style.width = `${progressoMeta}%`;
+    
+    // Horário mais produtivo (simulado baseado em padrões comuns)
+    const horariosComuns = [
+      '08:00 - 10:00', '09:00 - 11:00', '10:00 - 12:00',
+      '14:00 - 16:00', '15:00 - 17:00', '19:00 - 21:00', '20:00 - 22:00'
+    ];
+    const horarioAleatorio = horariosComuns[Math.floor(Math.random() * horariosComuns.length)];
+    document.getElementById('best-time').textContent = horarioAleatorio;
   }
 }
 
@@ -278,9 +344,11 @@ document.addEventListener('DOMContentLoaded', () => {
       chartBtns.forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       
-      const period = e.target.dataset.period;
-      // Aqui você pode implementar a lógica para atualizar o gráfico baseado no período
-      console.log(`Atualizando gráfico para ${period} dias`);
+      const period = parseInt(e.target.dataset.period);
+      if (productivityChart) {
+        productivityChart.destroy();
+      }
+      createProductivityChart(currentDiasEstudados, period);
     });
   });
 });

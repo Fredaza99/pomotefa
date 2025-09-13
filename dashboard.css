@@ -209,10 +209,10 @@
 }
 
 .heatmap-day.level-0 { background: #161b22; }
-.heatmap-day.level-1 { background: #0e4429; }
-.heatmap-day.level-2 { background: #006d32; }
-.heatmap-day.level-3 { background: #26a641; }
-.heatmap-day.level-4 { background: #39d353; }
+.heatmap-day.level-1 { background: #003d66; }
+.heatmap-day.level-2 { background: #0066aa; }
+.heatmap-day.level-3 { background: #0099cc; }
+.heatmap-day.level-4 { background: #00d4ff; }
 
 /* Metrics Section */
 .metrics-section {
