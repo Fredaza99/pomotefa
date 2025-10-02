@@ -1,0 +1,494 @@
+/* ranking.css */
+
+.ranking-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 100%);
+  padding: 2rem;
+}
+
+.ranking-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  color: #fff;
+}
+
+.ranking-header h1 {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 3rem;
+  color: #00D4FF;
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+  margin-bottom: 0.5rem;
+}
+
+.ranking-header .subtitle {
+  font-size: 1.2rem;
+  color: #aaa;
+  margin-bottom: 2rem;
+}
+
+.ranking-nav {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.ranking-nav .nav-btn {
+  padding: 0.8rem 1.5rem;
+  background: rgba(0, 212, 255, 0.1);
+  border: 2px solid #00D4FF;
+  color: #00D4FF;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.ranking-nav .nav-btn:hover {
+  background: #00D4FF;
+  color: #000;
+  transform: translateY(-2px);
+}
+
+/* Filtros */
+.ranking-filters {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 3rem;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 1rem 2rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  color: #fff;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-btn:hover {
+  border-color: #00D4FF;
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.filter-btn.active {
+  background: #00D4FF;
+  color: #000;
+  border-color: #00D4FF;
+}
+
+/* Pódio */
+.podium-section {
+  margin-bottom: 3rem;
+}
+
+.podium {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 2rem;
+  max-width: 900px;
+  margin: 0 auto;
+  flex-wrap: wrap;
+}
+
+.podium-place {
+  position: relative;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s;
+  min-width: 200px;
+}
+
+.podium-place:hover {
+  transform: translateY(-10px);
+  border-color: #00D4FF;
+  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+}
+
+.podium-place.first {
+  order: 2;
+  border-color: #FFD700;
+  background: rgba(255, 215, 0, 0.1);
+  padding-top: 3rem;
+}
+
+.podium-place.second {
+  order: 1;
+  border-color: #C0C0C0;
+  background: rgba(192, 192, 192, 0.1);
+}
+
+.podium-place.third {
+  order: 3;
+  border-color: #CD7F32;
+  background: rgba(205, 127, 50, 0.1);
+}
+
+.podium-crown {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 2rem;
+  color: #FFD700;
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-10px); }
+}
+
+.podium-avatar {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.podium-avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  border: 3px solid #00D4FF;
+  background: #1a1a2e;
+}
+
+.podium-place.first .podium-avatar img {
+  border-color: #FFD700;
+  width: 120px;
+  height: 120px;
+}
+
+.podium-medal {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  border: 2px solid #000;
+}
+
+.podium-medal.gold {
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #000;
+}
+
+.podium-medal.silver {
+  background: linear-gradient(135deg, #C0C0C0, #A8A8A8);
+  color: #000;
+}
+
+.podium-medal.bronze {
+  background: linear-gradient(135deg, #CD7F32, #B8733C);
+  color: #000;
+}
+
+.podium-info h3 {
+  color: #fff;
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.podium-hours {
+  font-size: 1.5rem;
+  color: #00D4FF;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+.podium-rank {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  background: rgba(0, 212, 255, 0.2);
+  border-radius: 20px;
+  color: #00D4FF;
+  font-size: 0.9rem;
+}
+
+.current-user-podium {
+  box-shadow: 0 0 30px rgba(0, 212, 255, 0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 30px rgba(0, 212, 255, 0.5); }
+  50% { box-shadow: 0 0 50px rgba(0, 212, 255, 0.8); }
+}
+
+/* Tabela de Ranking */
+.ranking-table-section {
+  margin-bottom: 3rem;
+}
+
+.table-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.table-header h3 {
+  color: #00D4FF;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.your-position {
+  color: #fff;
+  font-size: 1.1rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 212, 255, 0.1);
+  border-radius: 8px;
+}
+
+.your-position span {
+  font-weight: bold;
+  color: #00D4FF;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+.ranking-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ranking-table thead {
+  background: rgba(0, 212, 255, 0.1);
+}
+
+.ranking-table th {
+  padding: 1rem;
+  text-align: left;
+  color: #00D4FF;
+  font-weight: 600;
+  border-bottom: 2px solid #00D4FF;
+}
+
+.ranking-table td {
+  padding: 1rem;
+  color: #fff;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ranking-table tr:hover {
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.ranking-table tr.current-user {
+  background: rgba(0, 212, 255, 0.15);
+  border-left: 4px solid #00D4FF;
+}
+
+.position-cell {
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.gold-trophy {
+  color: #FFD700;
+  font-size: 1.5rem;
+}
+
+.silver-medal {
+  color: #C0C0C0;
+  font-size: 1.5rem;
+}
+
+.bronze-medal {
+  color: #CD7F32;
+  font-size: 1.5rem;
+}
+
+.position-number {
+  color: #00D4FF;
+}
+
+.user-cell {
+  min-width: 200px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid #00D4FF;
+}
+
+.user-name {
+  font-weight: 500;
+}
+
+.user-name-link {
+  color: #fff;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.user-name-link:hover {
+  color: #00D4FF;
+  text-decoration: underline;
+}
+
+.rank-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.rank-novato { background: #555; color: #fff; }
+.rank-aprendiz { background: #4CAF50; color: #fff; }
+.rank-estudante { background: #2196F3; color: #fff; }
+.rank-dedicado { background: #9C27B0; color: #fff; }
+.rank-mestre { background: #FF9800; color: #000; }
+.rank-lendário { background: linear-gradient(135deg, #FFD700, #FF6B6B); color: #000; }
+
+.hours-cell {
+  font-weight: bold;
+  color: #00D4FF;
+  font-size: 1.1rem;
+}
+
+.streak-cell {
+  color: #FF6B6B;
+}
+
+.achievements-cell {
+  color: #FFD700;
+}
+
+.loading, .error, .empty {
+  text-align: center;
+  padding: 3rem;
+  color: #aaa;
+  font-size: 1.1rem;
+}
+
+.error {
+  color: #FF6B6B;
+}
+
+/* Estatísticas Globais */
+.global-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.stat-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(0, 212, 255, 0.3);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  border-color: #00D4FF;
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+}
+
+.stat-card i {
+  font-size: 3rem;
+  color: #00D4FF;
+  margin-bottom: 1rem;
+}
+
+.stat-card h4 {
+  color: #aaa;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-card p {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .ranking-header h1 {
+    font-size: 2rem;
+  }
+  
+  .podium {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .podium-place {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .podium-place.first,
+  .podium-place.second,
+  .podium-place.third {
+    order: initial;
+  }
+  
+  .table-card {
+    padding: 1rem;
+  }
+  
+  .ranking-table th,
+  .ranking-table td {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+  
+  .user-avatar {
+    width: 30px;
+    height: 30px;
+  }
+}

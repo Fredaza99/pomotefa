@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ranking - Pomotefa</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/icones/favicon-32x32.png">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ranking.css">
+</head>
+<body>
+  <div class="ranking-container">
+    <header class="ranking-header">
+      <h1><i class="fas fa-trophy"></i> Ranking Global</h1>
+      <p class="subtitle">Os estudantes mais dedicados do Pomotefa</p>
+      <nav class="ranking-nav">
+        <a href="app.html" class="nav-btn"><i class="fas fa-home"></i> App</a>
+        <a href="dashboard.html" class="nav-btn"><i class="fas fa-chart-line"></i> Dashboard</a>
+        <a href="perfil.html" class="nav-btn"><i class="fas fa-user"></i> Perfil</a>
+        <button class="nav-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+      </nav>
+    </header>
+
+    <main class="ranking-main">
+      <!-- Filtros -->
+      <section class="ranking-filters">
+        <button class="filter-btn active" data-period="all" onclick="changeRankingPeriod('all')">
+          <i class="fas fa-infinity"></i> Todos os Tempos
+        </button>
+        <button class="filter-btn" data-period="month" onclick="changeRankingPeriod('month')">
+          <i class="fas fa-calendar-alt"></i> Este Mês
+        </button>
+        <button class="filter-btn" data-period="week" onclick="changeRankingPeriod('week')">
+          <i class="fas fa-calendar-week"></i> Esta Semana
+        </button>
+      </section>
+
+      <!-- Pódio (Top 3) -->
+      <section class="podium-section">
+        <div class="podium">
+          <!-- 2º Lugar -->
+          <div class="podium-place second" id="podium-2">
+            <div class="podium-avatar">
+              <img src="images/mascote2.webp" alt="2º Lugar">
+              <div class="podium-medal silver">2º</div>
+            </div>
+            <div class="podium-info">
+              <h3>---</h3>
+              <p class="podium-hours">0h</p>
+              <div class="podium-rank">Carregando...</div>
+            </div>
+          </div>
+
+          <!-- 1º Lugar -->
+          <div class="podium-place first" id="podium-1">
+            <div class="podium-crown">
+              <i class="fas fa-crown"></i>
+            </div>
+            <div class="podium-avatar">
+              <img src="images/mascote3.webp" alt="1º Lugar">
+              <div class="podium-medal gold">1º</div>
+            </div>
+            <div class="podium-info">
+              <h3>---</h3>
+              <p class="podium-hours">0h</p>
+              <div class="podium-rank">Carregando...</div>
+            </div>
+          </div>
+
+          <!-- 3º Lugar -->
+          <div class="podium-place third" id="podium-3">
+            <div class="podium-avatar">
+              <img src="images/mascote1.webp" alt="3º Lugar">
+              <div class="podium-medal bronze">3º</div>
+            </div>
+            <div class="podium-info">
+              <h3>---</h3>
+              <p class="podium-hours">0h</p>
+              <div class="podium-rank">Carregando...</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tabela de Ranking -->
+      <section class="ranking-table-section">
+        <div class="table-card">
+          <div class="table-header">
+            <h3><i class="fas fa-list-ol"></i> Classificação Completa</h3>
+            <div class="your-position" id="yourPosition">
+              Sua posição: <span>---</span>
+            </div>
+          </div>
+          <div class="table-container">
+            <table class="ranking-table">
+              <thead>
+                <tr>
+                  <th>Posição</th>
+                  <th>Estudante</th>
+                  <th>Rank</th>
+                  <th>Horas Estudadas</th>
+                  <th>Streak</th>
+                  <th>Conquistas</th>
+                </tr>
+              </thead>
+              <tbody id="rankingTableBody">
+                <tr>
+                  <td colspan="6" class="loading">
+                    <i class="fas fa-spinner fa-spin"></i> Carregando ranking...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Estatísticas Globais -->
+      <section class="global-stats">
+        <div class="stat-card">
+          <i class="fas fa-users"></i>
+          <h4>Total de Estudantes</h4>
+          <p id="totalUsers">0</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-clock"></i>
+          <h4>Horas Totais Estudadas</h4>
+          <p id="totalHours">0h</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-fire"></i>
+          <h4>Maior Streak</h4>
+          <p id="maxStreak">0 dias</p>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-chart-line"></i>
+          <h4>Média por Estudante</h4>
+          <p id="avgHours">0h</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script type="module" src="ranking.js"></script>
+</body>
+</html>

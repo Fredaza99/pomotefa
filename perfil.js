@@ -1,6 +1,6 @@
 // perfil.js
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
 
 // Configuração do Firebase (a mesma do seu projeto)
@@ -19,6 +19,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+let currentUserData = null;
+let currentUserId = null;
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     // Usuário está logado, carregar dados do perfil
@@ -30,11 +33,13 @@ onAuthStateChanged(auth, (user) => {
 });
 
 async function loadProfileData(user) {
+  currentUserId = user.uid;
   const userRef = doc(db, "usuarios", user.uid);
   const docSnap = await getDoc(userRef);
 
   if (docSnap.exists()) {
     const data = docSnap.data();
+    currentUserData = data;
     
     // Extrair dados do Firebase
     const materias = data.materias || {};
@@ -46,7 +51,9 @@ async function loadProfileData(user) {
     const totalHoras = totalMinutos / 60;
 
     // 1. Atualizar informações básicas
-    document.getElementById('user-name').textContent = user.email.split('@')[0];
+    const username = data.username || user.email.split('@')[0];
+    document.getElementById('user-name').textContent = username;
+    document.getElementById('currentUsername').textContent = username;
     updateAvatar(totalMinutos);
 
     // 2. Rank Atual
@@ -72,8 +79,17 @@ async function loadProfileData(user) {
 
   } else {
     console.log("Nenhum dado encontrado para este usuário!");
-    // Lidar com o caso de não haver dados
-    document.getElementById('user-name').textContent = user.email.split('@')[0];
+    // Criar documento inicial com username padrão
+    const defaultUsername = user.email.split('@')[0];
+    await setDoc(userRef, {
+      username: defaultUsername,
+      materias: {},
+      conquistas: {},
+      progressoExtra: 0,
+      diasEstudados: {}
+    });
+    document.getElementById('user-name').textContent = defaultUsername;
+    document.getElementById('currentUsername').textContent = defaultUsername;
   }
 }
 
@@ -173,5 +189,119 @@ window.logout = async function() {
     window.location.href = 'index.html';
   } catch (erro) {
     console.error("Erro ao fazer logout:", erro.message);
+  }
+}
+
+// ===== FUNÇÕES DE USERNAME =====
+
+// Abrir modal de username
+window.openUsernameModal = function() {
+  document.getElementById('usernameModal').style.display = 'flex';
+  document.getElementById('newUsername').value = '';
+  document.getElementById('usernameError').textContent = '';
+  document.getElementById('usernameSuccess').textContent = '';
+}
+
+// Fechar modal de username
+window.closeUsernameModal = function() {
+  document.getElementById('usernameModal').style.display = 'none';
+}
+
+// Validar formato do username
+function validateUsernameFormat(username) {
+  // 3-20 caracteres, apenas letras, números e underscore
+  const regex = /^[a-zA-Z0-9_]{3,20}$/;
+  return regex.test(username);
+}
+
+// Verificar se username já existe
+async function isUsernameAvailable(username) {
+  try {
+    const usernamesRef = collection(db, "usernames");
+    const q = query(usernamesRef, where("username", "==", username.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+    
+    // Se encontrou algum documento, username já existe
+    if (!querySnapshot.empty) {
+      // Verificar se é do próprio usuário
+      const existingDoc = querySnapshot.docs[0];
+      return existingDoc.data().userId === currentUserId;
+    }
+    
+    return true; // Username disponível
+  } catch (error) {
+    console.error("Erro ao verificar username:", error);
+    return false;
+  }
+}
+
+// Salvar novo username
+window.saveUsername = async function() {
+  const newUsername = document.getElementById('newUsername').value.trim();
+  const errorDiv = document.getElementById('usernameError');
+  const successDiv = document.getElementById('usernameSuccess');
+  
+  errorDiv.textContent = '';
+  successDiv.textContent = '';
+  
+  // Validar formato
+  if (!validateUsernameFormat(newUsername)) {
+    errorDiv.textContent = '❌ Username inválido! Use 3-20 caracteres (letras, números e _)';
+    return;
+  }
+  
+  // Verificar se está disponível
+  const available = await isUsernameAvailable(newUsername);
+  if (!available) {
+    errorDiv.textContent = '❌ Este nome de usuário já está em uso!';
+    return;
+  }
+  
+  try {
+    // Remover username antigo da coleção usernames (se existir)
+    if (currentUserData && currentUserData.username) {
+      const oldUsernameRef = doc(db, "usernames", currentUserData.username.toLowerCase());
+      try {
+        await setDoc(oldUsernameRef, { deleted: true }); // Marcar como deletado
+      } catch (e) {
+        console.log("Username antigo não encontrado, continuando...");
+      }
+    }
+    
+    // Adicionar novo username à coleção usernames
+    const usernameRef = doc(db, "usernames", newUsername.toLowerCase());
+    await setDoc(usernameRef, {
+      username: newUsername,
+      userId: currentUserId,
+      createdAt: new Date().toISOString()
+    });
+    
+    // Atualizar documento do usuário
+    const userRef = doc(db, "usuarios", currentUserId);
+    await updateDoc(userRef, {
+      username: newUsername
+    });
+    
+    // Atualizar interface
+    document.getElementById('user-name').textContent = newUsername;
+    document.getElementById('currentUsername').textContent = newUsername;
+    
+    successDiv.textContent = '✅ Nome de usuário atualizado com sucesso!';
+    
+    setTimeout(() => {
+      closeUsernameModal();
+    }, 1500);
+    
+  } catch (error) {
+    console.error("Erro ao salvar username:", error);
+    errorDiv.textContent = '❌ Erro ao salvar. Tente novamente.';
+  }
+}
+
+// Fechar modal ao clicar fora
+window.onclick = function(event) {
+  const modal = document.getElementById('usernameModal');
+  if (event.target === modal) {
+    closeUsernameModal();
   }
 }

@@ -328,8 +328,8 @@ function atualizarTimerDisplay() {
 
 function adicionarMateria() {
   const nome = document.getElementById("novaMateria").value.trim();
-  const meta = parseInt(document.getElementById("metaHoras").value);
-  if (!nome || !meta || materias[nome]) return;
+  const meta = parseFloat(document.getElementById("metaHoras").value);
+  if (!nome || !meta || meta <= 0 || materias[nome]) return;
 
   materias[nome] = { metaHoras: meta, minutosEstudados: 0 };
   atualizarSelect();
@@ -732,7 +732,7 @@ function verificarConquistas() {
       tabelaEdicao.innerHTML += `
         <tr>
           <td><input type="text" value="${nome}" data-original="${nome}" class="input-nome"></td>
-          <td><input type="number" min="1" value="${metaHoras}" class="input-meta"></td>
+          <td><input type="number" min="0.5" step="0.5" value="${metaHoras}" class="input-meta"></td>
           <td><button onclick="excluirMateria('${nome}')">🗑️ Excluir</button></td>
         </tr>
       `;
@@ -750,10 +750,10 @@ function verificarConquistas() {
       const inputMeta = linha.querySelector(".input-meta");
   
       const novoNome = inputNome.value.trim();
-      const meta = parseInt(inputMeta.value);
+      const meta = parseFloat(inputMeta.value);
       const nomeOriginal = inputNome.getAttribute("data-original");
   
-      if (!novoNome || !meta) continue;
+      if (!novoNome || !meta || meta <= 0) continue;
   
       const minutosEstudados = materias[nomeOriginal]?.minutosEstudados || 0;
       novasMaterias[novoNome] = { metaHoras: meta, minutosEstudados };

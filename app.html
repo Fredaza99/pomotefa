@@ -32,6 +32,7 @@
       </div>
       <nav class="app-nav">
         <button class="nav-btn" onclick="abrirModalConquistas()"><i class="fas fa-trophy"></i> Conquistas</button>
+        <button class="nav-btn" onclick="window.location.href='ranking.html'"><i class="fas fa-ranking-star"></i> Ranking</button>
         <button class="nav-btn" onclick="window.location.href='perfil.html'"><i class="fas fa-user"></i> Perfil</button>
         <button class="nav-btn" onclick="window.location.href='dashboard.html'"><i class="fas fa-chart-line"></i> Dashboard</button>
         <button class="nav-btn logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
@@ -105,7 +106,7 @@
               <h4><i class="fas fa-plus"></i> Adicionar Nova Matéria</h4>
               <div class="form-config">
                 <input type="text" id="novaMateria" placeholder="Nome da matéria">
-                <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="1">
+                <input type="number" id="metaHoras" placeholder="Meta semanal (h)" min="0.5" step="0.5">
                 <button onclick="adicionarMateria()" class="add-btn">
                   <i class="fas fa-plus"></i> Adicionar
                 </button>

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Perfil de Estudante - Pomotefa</title>
+  <title>Perfil - Pomotefa</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
@@ -17,28 +17,13 @@
       <img id="user-avatar" src="images/mascote1.webp" alt="Avatar do Usuário" class="avatar">
       <h1 id="user-name">Carregando...</h1>
       <div class="header-buttons">
-        <a href="app.html" class="btn-voltar">Voltar ao App</a>
-        <a href="ranking.html" class="btn-voltar">🏆 Ranking</a>
-        <a href="dashboard.html" class="btn-voltar">📊 Dashboard</a>
-        <button class="btn-logout" onclick="logout()">🚪 Logout</button>
+        <a href="ranking.html" class="btn-voltar"><i class="fas fa-arrow-left"></i> Voltar ao Ranking</a>
+        <a href="app.html" class="btn-voltar"><i class="fas fa-home"></i> Início</a>
+        <a href="perfil.html" class="btn-voltar"><i class="fas fa-user"></i> Meu Perfil</a>
       </div>
     </header>
 
     <main class="perfil-main">
-      <!-- Seção de Edição de Username -->
-      <section class="username-section">
-        <div class="username-card">
-          <h2><i class="fas fa-user-edit"></i> Nome de Usuário</h2>
-          <div class="username-display" id="usernameDisplay">
-            <span id="currentUsername">Carregando...</span>
-            <button class="btn-edit-username" onclick="openUsernameModal()">
-              <i class="fas fa-edit"></i> Editar
-            </button>
-          </div>
-          <p class="username-info">Este é o nome que aparecerá no ranking e para outros usuários</p>
-        </div>
-      </section>
-
       <section class="stats-grid">
         <div class="stat-card">
           <h3>Rank Atual</h3>
@@ -69,6 +54,13 @@
         </div>
       </section>
 
+      <section class="subjects-section">
+        <h2>Matérias de Estudo</h2>
+        <div id="subjects-list" class="subjects-grid">
+          <!-- Matérias serão inseridas aqui -->
+        </div>
+      </section>
+
       <section class="total-hours">
         <h2>Total de Horas Estudadas</h2>
         <div class="progress-bar-container">
@@ -76,35 +68,19 @@
         </div>
         <p id="total-hours-text">0 horas</p>
       </section>
+
+      <section class="ranking-position">
+        <h2>Posição no Ranking</h2>
+        <div class="position-card">
+          <div class="position-number" id="ranking-position">
+            <i class="fas fa-trophy"></i>
+            <span>Carregando...</span>
+          </div>
+        </div>
+      </section>
     </main>
   </div>
 
-  <!-- Modal de Edição de Username -->
-  <div id="usernameModal" class="modal-username">
-    <div class="modal-username-content">
-      <span class="close-username" onclick="closeUsernameModal()">&times;</span>
-      <h2><i class="fas fa-user-edit"></i> Alterar Nome de Usuário</h2>
-      <div class="username-form">
-        <div class="input-group-username">
-          <label for="newUsername">Novo nome de usuário:</label>
-          <input 
-            type="text" 
-            id="newUsername" 
-            placeholder="Digite seu nome de usuário" 
-            maxlength="20"
-            autocomplete="off"
-          >
-          <small class="username-hint">3-20 caracteres, apenas letras, números e _</small>
-          <div id="usernameError" class="error-message"></div>
-          <div id="usernameSuccess" class="success-message"></div>
-        </div>
-        <button class="btn-save-username" onclick="saveUsername()">
-          <i class="fas fa-save"></i> Salvar Nome de Usuário
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script type="module" src="perfil.js"></script>
+  <script type="module" src="perfil-publico.js"></script>
 </body>
 </html>
