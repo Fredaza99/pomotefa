@@ -106,6 +106,7 @@ let currentCycle = 1;
 let currentSession = 'focus'; // 'focus' ou 'break'
 let focusTimeRemaining = 30 * 60; // 30 minutos em segundos
 let isBreakTime = false;
+let segundosAcumuladosFoco = 0; // Contador de segundos para modo Pomodoro
 
 // Configuração dos ciclos Pomodoro
 const pomodoroConfig = {
@@ -241,12 +242,18 @@ function desbloquearConquista(id) {
 }
 
 function verificarMaratona(dias) {
-  const datas = dias.map(d => new Date(d)).sort((a, b) => a - b);
-  if (datas.length < 3) return;
+  if (dias.length < 3) return;
 
+  // Converter strings de data brasileira (dd/mm/yyyy) para objetos Date
+  const datas = dias.map(d => {
+    const parts = d.split('/');
+    return new Date(parts[2], parts[1] - 1, parts[0]);
+  }).sort((a, b) => a - b);
+
+  // Verificar os últimos 3 dias
   const ultimos = datas.slice(-3);
-  const diff1 = (ultimos[1] - ultimos[0]) / (1000 * 60 * 60 * 24);
-  const diff2 = (ultimos[2] - ultimos[1]) / (1000 * 60 * 60 * 24);
+  const diff1 = Math.round((ultimos[1] - ultimos[0]) / (1000 * 60 * 60 * 24));
+  const diff2 = Math.round((ultimos[2] - ultimos[1]) / (1000 * 60 * 60 * 24));
 
   if (diff1 === 1 && diff2 === 1 && !conquistas.maratona.desbloqueada) {
     desbloquearConquista("maratona");
@@ -285,21 +292,21 @@ function iniciarEstudo() {
         }
       }
 
-      const hoje = new Date().toLocaleDateString();
-      let minutosHoje = parseInt(null || "0");
-      minutosHoje += 1;
-      // removido localStorage.setItem
+      const hoje = new Date().toLocaleDateString('pt-BR');
+      
+      // Atualizar minutos do dia atual
+      if (!diasEstudados[hoje]) {
+        diasEstudados[hoje] = 0;
+      }
+      diasEstudados[hoje] += 1;
 
-      if (minutosHoje >= 480 && !conquistas.esforcoDiario.desbloqueada) {
+      // Verificar conquista de 8 horas em um dia
+      if (diasEstudados[hoje] >= 480 && !conquistas.esforcoDiario.desbloqueada) {
         desbloquearConquista("esforcoDiario");
       }
 
-      let diasEstudados = [];
-      if (!diasEstudados.includes(hoje)) {
-        diasEstudados.push(hoje);
-        // removido localStorage.setItem
-      }
-      verificarMaratona(diasEstudados);
+      // Verificar conquista de maratona (3 dias seguidos)
+      verificarMaratona(Object.keys(diasEstudados));
 
       salvarNoFirebase(gerarDadosParaSalvar());
       atualizarTabela();
@@ -323,7 +330,13 @@ function atualizarTimerDisplay() {
     `${String(horas).padStart(2, '0')}:${String(minutos).padStart(2, '0')}:${String(segundos).padStart(2, '0')}`;
 
   document.getElementById("timer").textContent = tempoFormatado;
-  document.title = timerInterval ? ` ${tempoFormatado} - Pomotefa` : 'Pomotefa';
+  
+  // Atualizar título da aba com o timer
+  if (timerInterval) {
+    document.title = `⏱️ ${tempoFormatado} - Pomotefa`;
+  } else {
+    document.title = 'Pomotefa - Timer Pomodoro';
+  }
 }
 
 function adicionarMateria() {
@@ -428,6 +441,9 @@ function exitFocusMode() {
   }
   document.getElementById('focusOverlay').classList.remove('active');
   resetFocusState();
+  
+  // Restaurar título padrão
+  document.title = 'Pomotefa - Timer Pomodoro';
 }
 
 // Resetar estado do foco
@@ -436,6 +452,7 @@ function resetFocusState() {
   currentSession = 'focus';
   focusTimeRemaining = pomodoroConfig.focusTime;
   isBreakTime = false;
+  segundosAcumuladosFoco = 0; // Resetar contador de segundos
   updateFocusDisplay();
 }
 
@@ -460,6 +477,40 @@ function startFocusTimer() {
   focusTimer = setInterval(() => {
     focusTimeRemaining--;
     updateFocusDisplay();
+    
+    // Registrar tempo minuto a minuto durante sessão de foco
+    if (currentSession === 'focus') {
+      segundosAcumuladosFoco++;
+      
+      if (segundosAcumuladosFoco >= 60) {
+        const materiaAtual = document.getElementById('materiaAtual').value;
+        if (materiaAtual && materias[materiaAtual]) {
+          materias[materiaAtual].minutosEstudados += 1;
+          
+          // Atualizar diasEstudados
+          const hoje = new Date().toLocaleDateString('pt-BR');
+          if (!diasEstudados[hoje]) {
+            diasEstudados[hoje] = 0;
+          }
+          diasEstudados[hoje] += 1;
+          
+          // Verificar conquistas
+          if (diasEstudados[hoje] >= 480 && !conquistas.esforcoDiario.desbloqueada) {
+            desbloquearConquista("esforcoDiario");
+          }
+          verificarMaratona(Object.keys(diasEstudados));
+          
+          // Salvar no Firebase
+          salvarNoFirebase(gerarDadosParaSalvar());
+          atualizarTabela();
+          atualizarMascote();
+          atualizarResumoEstudos();
+          
+          console.log(`✅ Pomodoro: +1 minuto registrado para ${materiaAtual}`);
+        }
+        segundosAcumuladosFoco = 0;
+      }
+    }
     
     if (focusTimeRemaining <= 0) {
       handleFocusSessionComplete();
@@ -488,13 +539,13 @@ function handleFocusSessionComplete() {
     }
     isBreakTime = true;
     
-    // Registrar tempo estudado
-    const materiaAtual = document.getElementById('materiaAtual').value;
-    if (materiaAtual && materias[materiaAtual]) {
-      materias[materiaAtual].minutosEstudados += 30;
-      salvarNoFirebase(gerarDadosParaSalvar());
-      atualizarResumoEstudos();
-    }
+    // Resetar contador de segundos ao mudar de sessão
+    segundosAcumuladosFoco = 0;
+    
+    // Tempo já foi registrado minuto a minuto, apenas atualizar interface
+    atualizarTabela();
+    atualizarMascote();
+    atualizarResumoEstudos();
     
   } else {
     // Pausa completa
@@ -542,20 +593,38 @@ function updateFocusDisplay() {
   
   cycleEl.textContent = currentCycle;
   
+  let sessionText = '';
+  let emoji = '';
+  
   if (currentSession === 'focus') {
     sessionEl.textContent = 'FOCO';
     sessionEl.style.color = '#00D4FF';
+    sessionText = 'FOCO';
+    emoji = '🎯';
   } else if (currentSession === 'shortBreak') {
     sessionEl.textContent = 'PAUSA CURTA';
     sessionEl.style.color = '#FFD700';
+    sessionText = 'PAUSA';
+    emoji = '☕';
   } else if (currentSession === 'longBreak') {
     sessionEl.textContent = 'PAUSA LONGA';
     sessionEl.style.color = '#FF6B6B';
+    sessionText = 'PAUSA LONGA';
+    emoji = '🌟';
   }
   
   const minutes = Math.floor(focusTimeRemaining / 60);
   const seconds = focusTimeRemaining % 60;
-  timerEl.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const timeFormatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  
+  timerEl.textContent = timeFormatted;
+  
+  // Atualizar título da aba no modo Pomodoro
+  if (focusMode && focusTimer) {
+    document.title = `${emoji} ${timeFormatted} ${sessionText} - Pomotefa`;
+  } else if (focusMode) {
+    document.title = `${emoji} ${timeFormatted} ${sessionText} (Pausado) - Pomotefa`;
+  }
 }
 
 // Tocar som de notificação
@@ -628,15 +697,8 @@ function verificarConquistas() {
     desbloquearConquista("primeiraMeta");
   }
 
-
-  let diasEstudados = [];
-  const hoje = new Date().toISOString().split("T")[0];
-  if (!diasEstudados.includes(hoje)) {
-    diasEstudados.push(hoje);
-    // removido localStorage.setItem
-  }
-  verificarMaratona(diasEstudados);
-
+  // Verificar maratona com os dados globais
+  verificarMaratona(Object.keys(diasEstudados));
 }
 
 
