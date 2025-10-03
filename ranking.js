@@ -22,6 +22,20 @@ let currentUser = null;
 let allUsersData = [];
 let currentPeriod = 'all';
 
+// Função auxiliar para formatar minutos em horas e minutos
+function formatarTempo(minutos) {
+  const horas = Math.floor(minutos / 60);
+  const mins = Math.round(minutos % 60);
+  
+  if (horas === 0) {
+    return `${mins}min`;
+  } else if (mins === 0) {
+    return `${horas}h`;
+  } else {
+    return `${horas}h ${mins}min`;
+  }
+}
+
 // Verificar autenticação
 onAuthStateChanged(auth, (user) => {
   if (user) {
@@ -183,7 +197,7 @@ function renderRanking() {
         </div>
       </td>
       <td><span class="rank-badge rank-${user.rank.toLowerCase()}">${user.rank}</span></td>
-      <td class="hours-cell">${user.totalHoras.toFixed(1)}h</td>
+      <td class="hours-cell">${formatarTempo(user.totalMinutos)}</td>
       <td class="streak-cell">
         <i class="fas fa-fire"></i> ${user.streak} dias
       </td>
@@ -215,7 +229,7 @@ function renderPodium() {
       
       // Tornar o nome clicável
       name.innerHTML = `<a href="perfil-publico.html?userId=${user.userId}" style="color: inherit; text-decoration: none;">${user.username}</a>`;
-      hours.textContent = `${user.totalHoras.toFixed(1)}h`;
+      hours.textContent = formatarTempo(user.totalMinutos);
       rank.textContent = user.rank;
       
       if (user.userId === currentUser.uid) {
@@ -241,9 +255,9 @@ function renderGlobalStats() {
   const avgHours = totalUsers > 0 ? totalHours / totalUsers : 0;
   
   document.getElementById('totalUsers').textContent = totalUsers;
-  document.getElementById('totalHours').textContent = `${totalHours.toFixed(1)}h`;
+  document.getElementById('totalHours').textContent = formatarTempo(totalHours * 60);
   document.getElementById('maxStreak').textContent = `${maxStreak} dias`;
-  document.getElementById('avgHours').textContent = `${avgHours.toFixed(1)}h`;
+  document.getElementById('avgHours').textContent = formatarTempo(avgHours * 60);
 }
 
 // Destacar usuário atual

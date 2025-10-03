@@ -22,6 +22,20 @@ const auth = getAuth(app);
 let currentUserData = null;
 let currentUserId = null;
 
+// Função auxiliar para formatar minutos em horas e minutos
+function formatarTempo(minutos) {
+  const horas = Math.floor(minutos / 60);
+  const mins = Math.round(minutos % 60);
+  
+  if (horas === 0) {
+    return `${mins}min`;
+  } else if (mins === 0) {
+    return `${horas}h`;
+  } else {
+    return `${horas}h ${mins}min`;
+  }
+}
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     // Usuário está logado, carregar dados do perfil
@@ -73,7 +87,7 @@ async function loadProfileData(user) {
     displayRecentAchievements(conquistas);
 
     // 7. Total de Horas Estudadas
-    document.getElementById('total-hours-text').textContent = `${totalHoras.toFixed(2)} horas`;
+    document.getElementById('total-hours-text').textContent = formatarTempo(totalMinutos);
     const rankProgress = (totalHoras % 50) / 50 * 100; // Exemplo: progresso para o próximo rank a cada 50h
     document.getElementById('total-hours-bar').style.width = `${rankProgress}%`;
 

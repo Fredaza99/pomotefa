@@ -38,9 +38,22 @@ async function carregarDoFirebase() {
   if (snap.exists()) {
     const dados = snap.data();
     materias = dados.materias || {};
-    conquistas = dados.conquistas || conquistas;
+    
+    // Mesclar conquistas salvas com as novas
+    const conquistasSalvas = dados.conquistas || {};
+    for (const id in conquistasSalvas) {
+      if (conquistas[id]) {
+        conquistas[id].desbloqueada = conquistasSalvas[id].desbloqueada;
+      }
+    }
+    
     progressoExtra = dados.progressoExtra || 0;
     diasEstudados = dados.diasEstudados || {};
+    horariosEstudo = dados.horariosEstudo || {};
+    
+    // Salvar conquistas atualizadas (incluindo novas)
+    await updateDoc(usuarioRef, { conquistas: conquistas });
+    
     atualizarSelect();
     atualizarTabela();
     atualizarMascote();
@@ -51,7 +64,8 @@ async function carregarDoFirebase() {
       materias: {},
       conquistas: conquistas,
       progressoExtra: 0,
-      diasEstudados: {}
+      diasEstudados: {},
+      horariosEstudo: {}
     });
   }
 }
@@ -85,7 +99,8 @@ function gerarDadosParaSalvar() {
     materias: materias || {},
     conquistas: conquistas || {},
     progressoExtra: progressoExtra || 0,
-    diasEstudados: diasEstudados || {}
+    diasEstudados: diasEstudados || {},
+    horariosEstudo: horariosEstudo || {}
   };
 }
 
@@ -94,6 +109,22 @@ function gerarDadosParaSalvar() {
 let materias = {};
 
 let diasEstudados = {};
+
+let horariosEstudo = {}; // Rastrear horários de estudo
+
+// Função para obter faixa de horário atual
+function getFaixaHorario() {
+  const agora = new Date();
+  const hora = agora.getHours();
+  
+  if (hora >= 6 && hora < 9) return '06:00 - 09:00';
+  if (hora >= 9 && hora < 12) return '09:00 - 12:00';
+  if (hora >= 12 && hora < 15) return '12:00 - 15:00';
+  if (hora >= 15 && hora < 18) return '15:00 - 18:00';
+  if (hora >= 18 && hora < 21) return '18:00 - 21:00';
+  if (hora >= 21 && hora < 24) return '21:00 - 00:00';
+  return '00:00 - 06:00';
+}
 
 let timerInterval;
 let tempoRestante = 0;
@@ -178,6 +209,24 @@ let conquistas = {
     descricao: "Estude por 3 dias seguidos.",
     icone: "images/conquistas/maratona.png",
     desbloqueada: false
+  },
+  centenario: {
+    titulo: "Centenário do Conhecimento",
+    descricao: "Acumule 100 horas totais de estudo.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
+  },
+  corujaDaNoite: {
+    titulo: "Coruja da Noite",
+    descricao: "Estude 10 horas entre 21:00 e 06:00.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
+  },
+  mestre5Materias: {
+    titulo: "Polímata",
+    descricao: "Complete a meta de 5 matérias diferentes.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
   }
 };
 
@@ -257,6 +306,43 @@ function verificarMaratona(dias) {
 
   if (diff1 === 1 && diff2 === 1 && !conquistas.maratona.desbloqueada) {
     desbloquearConquista("maratona");
+  }
+}
+
+// Verificar novas conquistas
+function verificarNovasConquistas() {
+  // 1. Centenário do Conhecimento - 100 horas totais
+  const totalMinutos = Object.values(materias).reduce((acc, m) => acc + m.minutosEstudados, 0) + progressoExtra;
+  const totalHoras = totalMinutos / 60;
+  
+  if (totalHoras >= 100 && !conquistas.centenario.desbloqueada) {
+    desbloquearConquista("centenario");
+  }
+  
+  // 2. Coruja da Noite - 10 horas entre 21:00 e 06:00
+  const horariosNoturnos = ['21:00 - 00:00', '00:00 - 06:00'];
+  let minutosNoturnos = 0;
+  
+  horariosNoturnos.forEach(horario => {
+    minutosNoturnos += horariosEstudo[horario] || 0;
+  });
+  
+  if (minutosNoturnos >= 600 && !conquistas.corujaDaNoite.desbloqueada) {
+    desbloquearConquista("corujaDaNoite");
+  }
+  
+  // 3. Polímata - Complete 5 matérias diferentes
+  let materiasCompletas = 0;
+  
+  for (const nome in materias) {
+    const materia = materias[nome];
+    if (materia.minutosEstudados >= materia.metaHoras * 60) {
+      materiasCompletas++;
+    }
+  }
+  
+  if (materiasCompletas >= 5 && !conquistas.mestre5Materias.desbloqueada) {
+    desbloquearConquista("mestre5Materias");
   }
 }
 
@@ -399,8 +485,8 @@ function concluirMeta(materiaNome) {
   // 💾 Atualizações visuais e armazenamento
   salvarNoFirebase(gerarDadosParaSalvar());
   atualizarTabela();
-  atualizarResumoEstudos();
   atualizarMascote();
+  atualizarResumoEstudos();
 }
 
 function mostrarToast(mensagem) {
@@ -494,11 +580,19 @@ function startFocusTimer() {
           }
           diasEstudados[hoje] += 1;
           
+          // Atualizar horários de estudo
+          const faixaHorario = getFaixaHorario();
+          if (!horariosEstudo[faixaHorario]) {
+            horariosEstudo[faixaHorario] = 0;
+          }
+          horariosEstudo[faixaHorario] += 1;
+          
           // Verificar conquistas
           if (diasEstudados[hoje] >= 480 && !conquistas.esforcoDiario.desbloqueada) {
             desbloquearConquista("esforcoDiario");
           }
           verificarMaratona(Object.keys(diasEstudados));
+          verificarNovasConquistas();
           
           // Salvar no Firebase
           salvarNoFirebase(gerarDadosParaSalvar());
@@ -705,26 +799,19 @@ function verificarConquistas() {
   
   function atualizarResumoEstudos() {
     const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
-    const totalHoras = (totalMinutos / 60).toFixed(2);
   
     const resumoEl = document.getElementById("resumoEstudos");
     const totalEl = document.getElementById("totalHoras");
-    const headerTotalEl = document.getElementById("headerTotalHoras");
-    const tooltipDetalhes = document.getElementById("tooltipDetalhes");
   
     if (resumoEl && totalEl) {
-      totalEl.textContent = `${totalHoras} horas`;
-    }
-    
-    if (headerTotalEl) {
-      headerTotalEl.textContent = `${totalHoras} horas estudadas`;
+      totalEl.textContent = formatarTempo(totalMinutos);
     }
   
+    const tooltipDetalhes = document.getElementById("tooltipDetalhes");
     if (tooltipDetalhes) {
       tooltipDetalhes.textContent = ""; // limpa antes
       for (const nome in materias) {
-        const horas = (materias[nome].minutosEstudados / 60).toFixed(2);
-        tooltipDetalhes.textContent += `${nome}: ${horas}h\n`;
+        tooltipDetalhes.textContent += `${nome}: ${formatarTempo(materias[nome].minutosEstudados)}\n`;
       }
     }
   }
@@ -737,15 +824,41 @@ function verificarConquistas() {
 
   function atualizarMascote() {
     const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
+    const totalHoras = totalMinutos / 60;
     const mascoteImg = document.getElementById("mascoteImg");
     const nivelMascote = document.getElementById("nivelMascote");
     const barraXp = document.getElementById("xpMascote");
     const textoXp = document.getElementById("xpTexto");
+    const rankBadge = document.getElementById("rankBadge");
   
     let nivel = 1;
     let xpMin = 0;
     let xpMax = 240;
+    let rank = "Novato";
+    let rankClass = "novato";
   
+    // Calcular rank baseado em horas (igual ao ranking)
+    if (totalHoras >= 500) {
+      rank = "Lendário";
+      rankClass = "lendário";
+    } else if (totalHoras >= 200) {
+      rank = "Mestre";
+      rankClass = "mestre";
+    } else if (totalHoras >= 100) {
+      rank = "Dedicado";
+      rankClass = "dedicado";
+    } else if (totalHoras >= 50) {
+      rank = "Estudante";
+      rankClass = "estudante";
+    } else if (totalHoras >= 10) {
+      rank = "Aprendiz";
+      rankClass = "aprendiz";
+    } else {
+      rank = "Novato";
+      rankClass = "novato";
+    }
+  
+    // Calcular nível do mascote baseado em minutos
     if (totalMinutos >= 18000) { // 300h
       nivel = 6;
       xpMin = 18000;
@@ -774,6 +887,18 @@ function verificarConquistas() {
   
     mascoteImg.src = `images/mascote${Math.min(nivel, 5)}.webp`;
     nivelMascote.textContent = Math.min(nivel, 5);
+    
+    // Adicionar classe de nível para animações
+    mascoteImg.className = '';
+    if (nivel >= 3) {
+      mascoteImg.classList.add(`nivel-${Math.min(nivel, 5)}`);
+    }
+    
+    // Atualizar badge de rank
+    if (rankBadge) {
+      rankBadge.textContent = rank;
+      rankBadge.className = `rank-badge rank-${rankClass}`;
+    }
   
     const xpAtualMin = totalMinutos - xpMin;
     const xpNecessarioMin = xpMax - xpMin;

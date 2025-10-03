@@ -21,6 +21,20 @@ const auth = getAuth(app);
 let productivityChart, subjectChart;
 let currentDiasEstudados = {};
 
+// Função auxiliar para formatar minutos em horas e minutos
+function formatarTempo(minutos) {
+  const horas = Math.floor(minutos / 60);
+  const mins = Math.round(minutos % 60);
+  
+  if (horas === 0) {
+    return `${mins}min`;
+  } else if (mins === 0) {
+    return `${horas}h`;
+  } else {
+    return `${horas}h ${mins}min`;
+  }
+}
+
 onAuthStateChanged(auth, (user) => {
   if (user) {
     loadDashboardData(user);
@@ -61,7 +75,8 @@ async function loadDashboardData(user) {
 }
 
 function updateKPIs(totalHoras, diasEstudados, conquistas, materias) {
-  document.getElementById('total-hours-kpi').textContent = `${totalHoras.toFixed(1)}h`;
+  const totalMinutos = totalHoras * 60;
+  document.getElementById('total-hours-kpi').textContent = formatarTempo(totalMinutos);
   
   const streak = calculateStreak(diasEstudados);
   document.getElementById('streak-kpi').textContent = `${streak} dias`;
@@ -263,8 +278,7 @@ function createHeatmap(diasEstudados) {
     }
     day.classList.add(`level-${level}`);
     
-    const horas = (minutosNoDia / 60).toFixed(1);
-    day.title = `${dateStr}: ${minutosNoDia > 0 ? horas + 'h estudadas' : 'Não estudou'}`;
+    day.title = `${dateStr}: ${minutosNoDia > 0 ? formatarTempo(minutosNoDia) + ' estudadas' : 'Não estudou'}`;
     container.appendChild(day);
   }
 }
@@ -292,10 +306,9 @@ function updateMetrics(materias, diasEstudados) {
     );
     
     const melhorDiaIndex = mediaPorDia.indexOf(Math.max(...mediaPorDia));
-    const melhorDiaHoras = (mediaPorDia[melhorDiaIndex] / 60).toFixed(1);
     
     document.getElementById('best-day').textContent = diasSemana[melhorDiaIndex];
-    document.querySelector('#best-day').nextElementSibling.textContent = `Média: ${melhorDiaHoras}h`;
+    document.querySelector('#best-day').nextElementSibling.textContent = `Média: ${formatarTempo(mediaPorDia[melhorDiaIndex])}`;
     
     // Calcular tempo médio por sessão
     const totalSessoes = diasArray.length;
@@ -325,14 +338,52 @@ function updateMetrics(materias, diasEstudados) {
     
     document.getElementById('monthly-goal').textContent = `${Math.round(progressoMeta)}%`;
     document.querySelector('.progress-fill').style.width = `${progressoMeta}%`;
+  } else {
+    // Valores padrão quando não há dados
+    document.getElementById('best-day').textContent = '-';
+    document.querySelector('#best-day').nextElementSibling.textContent = 'Sem dados';
+    document.getElementById('avg-session').textContent = '0h 0min';
+    document.getElementById('monthly-goal').textContent = '0%';
+    document.querySelector('.progress-fill').style.width = '0%';
+  }
+  
+  // Calcular horário mais produtivo baseado em dados reais
+  calculateBestStudyTime(diasEstudados);
+}
+
+// Calcular horário mais produtivo
+async function calculateBestStudyTime(diasEstudados) {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
     
-    // Horário mais produtivo (simulado baseado em padrões comuns)
-    const horariosComuns = [
-      '08:00 - 10:00', '09:00 - 11:00', '10:00 - 12:00',
-      '14:00 - 16:00', '15:00 - 17:00', '19:00 - 21:00', '20:00 - 22:00'
-    ];
-    const horarioAleatorio = horariosComuns[Math.floor(Math.random() * horariosComuns.length)];
-    document.getElementById('best-time').textContent = horarioAleatorio;
+    const userRef = doc(db, "usuarios", user.uid);
+    const docSnap = await getDoc(userRef);
+    
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const horariosEstudo = data.horariosEstudo || {};
+      
+      if (Object.keys(horariosEstudo).length > 0) {
+        // Encontrar o horário com mais minutos estudados
+        let melhorHorario = '';
+        let maxMinutos = 0;
+        
+        for (const [horario, minutos] of Object.entries(horariosEstudo)) {
+          if (minutos > maxMinutos) {
+            maxMinutos = minutos;
+            melhorHorario = horario;
+          }
+        }
+        
+        document.getElementById('best-time').textContent = melhorHorario || 'Sem dados';
+      } else {
+        document.getElementById('best-time').textContent = 'Sem dados';
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao calcular melhor horário:', error);
+    document.getElementById('best-time').textContent = 'Erro ao carregar';
   }
 }
 

@@ -18,6 +18,20 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Função auxiliar para formatar minutos em horas e minutos
+function formatarTempo(minutos) {
+  const horas = Math.floor(minutos / 60);
+  const mins = Math.round(minutos % 60);
+  
+  if (horas === 0) {
+    return `${mins}min`;
+  } else if (mins === 0) {
+    return `${horas}h`;
+  } else {
+    return `${horas}h ${mins}min`;
+  }
+}
+
 // Pegar userId da URL
 const urlParams = new URLSearchParams(window.location.search);
 const targetUserId = urlParams.get('userId');
@@ -79,7 +93,7 @@ async function loadPublicProfile(userId) {
       displaySubjects(materias);
 
       // 8. Total de Horas Estudadas
-      document.getElementById('total-hours-text').textContent = `${totalHoras.toFixed(2)} horas`;
+      document.getElementById('total-hours-text').textContent = formatarTempo(totalMinutos);
       const rankProgress = (totalHoras % 50) / 50 * 100;
       document.getElementById('total-hours-bar').style.width = `${rankProgress}%`;
 
@@ -191,7 +205,6 @@ function displaySubjects(materias) {
   }
 
   for (const [nome, dados] of Object.entries(materias)) {
-    const horas = (dados.minutosEstudados / 60).toFixed(1);
     const progresso = Math.min((dados.minutosEstudados / (dados.metaHoras * 60)) * 100, 100);
 
     const div = document.createElement('div');
@@ -199,7 +212,7 @@ function displaySubjects(materias) {
     div.innerHTML = `
       <h3>${nome}</h3>
       <div class="subject-stats">
-        <span><i class="fas fa-clock"></i> ${horas}h estudadas</span>
+        <span><i class="fas fa-clock"></i> ${formatarTempo(dados.minutosEstudados)} estudadas</span>
         <span><i class="fas fa-target"></i> Meta: ${dados.metaHoras}h</span>
       </div>
       <div class="subject-progress">

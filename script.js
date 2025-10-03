@@ -6,6 +6,21 @@ let tempoDecorrido = 0;
 let materiaSelecionada = "";
 let segundosAcumulados = 0;
 let progressoExtra = 0;
+let inicioEstudo = null; // Timestamp do início do estudo
+
+// Função auxiliar para formatar minutos em horas e minutos
+function formatarTempo(minutos) {
+  const horas = Math.floor(minutos / 60);
+  const mins = Math.round(minutos % 60);
+  
+  if (horas === 0) {
+    return `${mins}min`;
+  } else if (mins === 0) {
+    return `${horas}h`;
+  } else {
+    return `${horas}h ${mins}min`;
+  }
+}
 
 
 
@@ -62,6 +77,24 @@ const conquistas = {
     descricao: "Estude por 3 dias seguidos.",
     icone: "images/conquistas/maratona.png",
     desbloqueada: false
+  },
+  centenario: {
+    titulo: "Centenário do Conhecimento",
+    descricao: "Acumule 100 horas totais de estudo.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
+  },
+  corujaDaNoite: {
+    titulo: "Coruja da Noite",
+    descricao: "Estude 10 horas entre 21:00 e 06:00.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
+  },
+  mestre5Materias: {
+    titulo: "Polímata",
+    descricao: "Complete a meta de 5 matérias diferentes.",
+    icone: "images/conquistas/primeira.png",
+    desbloqueada: false
   }
 };
 
@@ -73,6 +106,8 @@ if (conquistasSalvas) {
       conquistas[id].desbloqueada = salvas[id].desbloqueada;
     }
   }
+  // Salvar novamente para incluir novas conquistas
+  localStorage.setItem("conquistas", JSON.stringify(conquistas));
 }
 
 
@@ -151,16 +186,24 @@ function verificarMaratona(dias) {
   
     if (timer) return; // Já está rodando
   
+    // Salvar o timestamp real de início
+    inicioEstudo = Date.now() - (tempoDecorrido * 1000);
+  
     timer = setInterval(() => {
-      tempoDecorrido++;
-      segundosAcumulados++;
+      // Calcular tempo real baseado no timestamp
+      const tempoReal = Math.floor((Date.now() - inicioEstudo) / 1000);
+      const segundosPassados = tempoReal - tempoDecorrido;
+      
+      tempoDecorrido = tempoReal;
+      segundosAcumulados += segundosPassados;
   
       atualizarTimerDisplay();
   
       // A cada 60 segundos, somamos 1 minuto à matéria
       if (segundosAcumulados >= 60) {
-        materias[materiaSelecionada].minutosEstudados += 1;
-        segundosAcumulados = 0;
+        const minutosParaAdicionar = Math.floor(segundosAcumulados / 60);
+        materias[materiaSelecionada].minutosEstudados += minutosParaAdicionar;
+        segundosAcumulados = segundosAcumulados % 60;
 
         // ✅ Desbloqueios automáticos (seguros)
         const materia = materias[materiaSelecionada];
@@ -179,7 +222,7 @@ function verificarMaratona(dias) {
 
         const hoje = new Date().toLocaleDateString();
         let minutosHoje = parseInt(localStorage.getItem("estudoHoje_" + hoje) || "0");
-        minutosHoje += 1;
+        minutosHoje += minutosParaAdicionar;
         localStorage.setItem("estudoHoje_" + hoje, minutosHoje);
 
         if (minutosHoje >= 480 && !conquistas.esforcoDiario.desbloqueada) {
@@ -206,6 +249,7 @@ function verificarMaratona(dias) {
   function pararEstudo() {
     clearInterval(timer);
     timer = null;
+    inicioEstudo = null;
   }
   
   function atualizarTimerDisplay() {
@@ -337,21 +381,19 @@ function verificarConquistas() {
   
   function atualizarResumoEstudos() {
     const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
-    const totalHoras = (totalMinutos / 60).toFixed(2);
   
     const resumoEl = document.getElementById("resumoEstudos");
     const totalEl = document.getElementById("totalHoras");
-    const tooltipDetalhes = document.getElementById("tooltipDetalhes");
   
     if (resumoEl && totalEl) {
-      totalEl.textContent = totalHoras;
+      totalEl.textContent = formatarTempo(totalMinutos);
     }
   
+    const tooltipDetalhes = document.getElementById("tooltipDetalhes");
     if (tooltipDetalhes) {
       tooltipDetalhes.textContent = ""; // limpa antes
       for (const nome in materias) {
-        const horas = (materias[nome].minutosEstudados / 60).toFixed(2);
-        tooltipDetalhes.textContent += `${nome}: ${horas}h\n`;
+        tooltipDetalhes.textContent += `${nome}: ${formatarTempo(materias[nome].minutosEstudados)}\n`;
       }
     }
   }
@@ -364,15 +406,41 @@ function verificarConquistas() {
 
   function atualizarMascote() {
     const totalMinutos = Object.values(materias).reduce((soma, mat) => soma + mat.minutosEstudados, 0) + progressoExtra;
+    const totalHoras = totalMinutos / 60;
     const mascoteImg = document.getElementById("mascoteImg");
     const nivelMascote = document.getElementById("nivelMascote");
     const barraXp = document.getElementById("xpMascote");
     const textoXp = document.getElementById("xpTexto");
+    const rankBadge = document.getElementById("rankBadge");
   
     let nivel = 1;
     let xpMin = 0;
     let xpMax = 240;
+    let rank = "Novato";
+    let rankClass = "novato";
   
+    // Calcular rank baseado em horas (igual ao ranking)
+    if (totalHoras >= 500) {
+      rank = "Lendário";
+      rankClass = "lendário";
+    } else if (totalHoras >= 200) {
+      rank = "Mestre";
+      rankClass = "mestre";
+    } else if (totalHoras >= 100) {
+      rank = "Dedicado";
+      rankClass = "dedicado";
+    } else if (totalHoras >= 50) {
+      rank = "Estudante";
+      rankClass = "estudante";
+    } else if (totalHoras >= 10) {
+      rank = "Aprendiz";
+      rankClass = "aprendiz";
+    } else {
+      rank = "Novato";
+      rankClass = "novato";
+    }
+  
+    // Calcular nível do mascote baseado em minutos
     if (totalMinutos >= 18000) { // 300h
       nivel = 6;
       xpMin = 18000;
@@ -401,6 +469,18 @@ function verificarConquistas() {
   
     mascoteImg.src = `images/mascote${Math.min(nivel, 5)}.webp`;
     nivelMascote.textContent = Math.min(nivel, 5);
+    
+    // Adicionar classe de nível para animações
+    mascoteImg.className = '';
+    if (nivel >= 3) {
+      mascoteImg.classList.add(`nivel-${Math.min(nivel, 5)}`);
+    }
+    
+    // Atualizar badge de rank
+    if (rankBadge) {
+      rankBadge.textContent = rank;
+      rankBadge.className = `rank-badge rank-${rankClass}`;
+    }
   
     const xpAtualMin = totalMinutos - xpMin;
     const xpNecessarioMin = xpMax - xpMin;
