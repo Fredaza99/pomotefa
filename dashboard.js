@@ -151,7 +151,7 @@ function createProductivityChart(diasEstudados, period = 7) {
     }
     
     const minutosNoDia = diasEstudados[dateStr] || 0;
-    data.push(minutosNoDia / 60); // Converter minutos para horas
+    data.push(minutosNoDia); // Manter em minutos
   }
 
   productivityChart = new Chart(ctx, {
@@ -159,7 +159,7 @@ function createProductivityChart(diasEstudados, period = 7) {
     data: {
       labels: labels,
       datasets: [{
-        label: 'Horas Estudadas',
+        label: 'Tempo Estudado',
         data: data,
         borderColor: '#00D4FF',
         backgroundColor: 'rgba(0, 212, 255, 0.1)',
@@ -181,6 +181,13 @@ function createProductivityChart(diasEstudados, period = 7) {
       plugins: {
         legend: {
           display: false
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return formatarTempo(context.parsed.y);
+            }
+          }
         }
       },
       scales: {
@@ -190,7 +197,10 @@ function createProductivityChart(diasEstudados, period = 7) {
             color: '#333'
           },
           ticks: {
-            color: '#ccc'
+            color: '#ccc',
+            callback: function(value) {
+              return formatarTempo(value);
+            }
           }
         },
         x: {
@@ -215,9 +225,18 @@ function createSubjectChart(materias) {
   const labels = Object.keys(materias);
   const data = Object.values(materias).map(m => m.minutosEstudados);
   
+  // Cores espaciais variadas
   const colors = [
-    '#00D4FF', '#0099CC', '#0066AA', '#004488', '#002266',
-    '#33DDFF', '#66E6FF', '#99EEFF', '#CCF7FF', '#E6FBFF'
+    '#00D4FF', // Ciano
+    '#A855F7', // Roxo
+    '#EC4899', // Rosa
+    '#F59E0B', // Laranja
+    '#10B981', // Verde
+    '#8B5CF6', // Violeta
+    '#F97316', // Laranja escuro
+    '#06B6D4', // Turquesa
+    '#EF4444', // Vermelho
+    '#14B8A6'  // Teal
   ];
 
   subjectChart = new Chart(ctx, {
@@ -241,6 +260,15 @@ function createSubjectChart(materias) {
             color: '#ccc',
             padding: 20,
             usePointStyle: true
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              const label = context.label || '';
+              const value = context.parsed;
+              return label + ': ' + formatarTempo(value);
+            }
           }
         }
       },
